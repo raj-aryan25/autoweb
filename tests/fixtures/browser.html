@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Browser primitive fixtures</title></head>
+<body>
+<section id="cookies"><button onclick="document.querySelector('#cookies').remove()">Accept all</button></section>
+<form id="login">
+  <label for="username">Username</label><input id="username" name="username">
+  <label for="password">Password</label><input id="password" name="password" type="password">
+  <button type="submit">Sign in</button>
+</form>
+<form id="other"><label for="other-user">Username</label><input id="other-user"></form>
+<p data-testid="submitted" hidden>Form submitted</p>
+<label for="email">Email</label><input id="email" type="email" placeholder="Email address" data-testid="email">
+<label for="otp">Verification code</label><input id="otp">
+<div id="split-code">
+  <input aria-label="Code digit 1" maxlength="1">
+  <input aria-label="Code digit 2" maxlength="1">
+  <input aria-label="Code digit 3" maxlength="1">
+  <input aria-label="Code digit 4" maxlength="1">
+  <input aria-label="Code digit 5" maxlength="1">
+  <input aria-label="Code digit 6" maxlength="1">
+</div>
+<button id="run" data-testid="run">Run</button><button id="run-long">Run another task</button>
+<button class="duplicate">Duplicate</button><button class="duplicate">Duplicate</button>
+<button id="disabled" disabled>Disabled accept</button><button id="hidden" hidden>Hidden accept</button>
+<input id="readonly" readonly value="unchanged">
+<p data-testid="clicked" hidden>Clicked</p>
+<button id="reveal">Reveal delayed state</button>
+<p data-testid="delayed" hidden>Delayed</p>
+<a href="/destination.html">Next page</a>
+<custom-login id="shadow-host"></custom-login>
+<iframe id="outer" title="Outer frame" src="/outer.html"></iframe>
+<script>
+  document.querySelector('#login').addEventListener('submit', event => {
+    event.preventDefault(); document.querySelector('[data-testid="submitted"]').hidden = false;
+  });
+  document.querySelector('#run').onclick = () => document.querySelector('[data-testid="clicked"]').hidden = false;
+  document.querySelector('#run-long').onclick = () => document.body.dataset.wrongButton = 'clicked';
+  document.querySelector('#reveal').onclick = () => setTimeout(() => {
+    document.querySelector('[data-testid="delayed"]').hidden = false;
+  }, 100);
+  const shadow = document.querySelector('#shadow-host').attachShadow({mode: 'open'});
+  shadow.innerHTML = '<form id="shadow-form"><label for="shadow-password">Shadow password</label><input id="shadow-password" type="password"><button type="submit">Shadow submit</button></form><p data-testid="shadow-submitted" hidden>Submitted</p>';
+  shadow.querySelector('form').onsubmit = event => {
+    event.preventDefault(); shadow.querySelector('p').hidden = false;
+  };
+</script>
+</body></html>

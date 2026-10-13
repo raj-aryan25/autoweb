@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Inner</title></head><body>
+<section id="inner-cookies"><button onclick="document.querySelector('#inner-cookies').remove()">Inner accept</button></section>
+<form id="inner-form"><label for="inner-password">Inner password</label><input id="inner-password" type="password"><button type="submit">Inner submit</button></form>
+<p data-testid="inner-submitted" hidden>Submitted</p>
+<custom-login id="inner-shadow"></custom-login>
+<script>
+  document.querySelector('form').onsubmit = event => {
+    event.preventDefault(); document.querySelector('p').hidden = false;
+  };
+  const shadow = document.querySelector('#inner-shadow').attachShadow({mode: 'open'});
+  shadow.innerHTML = '<label for="code">Shadow verification code</label><input id="code"><button>Shadow verify</button><p data-testid="inner-shadow-verified" hidden>Verified</p>';
+  shadow.querySelector('button').onclick = () => shadow.querySelector('p').hidden = false;
+</script></body></html>

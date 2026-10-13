@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=78.1.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autoweb-framework"
+version = "0.1.0"
+description = "Modular Playwright testing and login framework"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "playwright==1.40.0",
+    "pydantic==2.11.7",
+    "python-dotenv==1.1.1",
+]
+
+[project.optional-dependencies]
+gmail = [
+    "google-api-python-client==2.176.0",
+    "google-auth-httplib2==0.2.0",
+    "google-auth-oauthlib==1.2.2",
+]
+ai = ["google-generativeai==0.8.5"]
+test = ["pytest==7.4.3", "pytest-asyncio==0.21.1"]
+
+[project.scripts]
+autoweb-config = "autoweb.config.cli:main"
+autoweb-login = "autoweb.login.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+asyncio_mode = "strict"

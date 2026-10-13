@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "name": "example-email-otp",
+  "entry_url": "https://example.com/login",
+  "login_mode": "email_otp",
+  "credentials": {
+    "email": {
+      "env": "EXAMPLE_EMAIL"
+    }
+  },
+  "steps": [
+    {
+      "action": "fill",
+      "target": {
+        "by": "label",
+        "value": "Email"
+      },
+      "credential": "email"
+    },
+    {
+      "action": "request_otp",
+      "target": {
+        "by": "role",
+        "value": "button",
+        "name": "Send code"
+      }
+    },
+    {
+      "action": "fill_otp",
+      "targets": [
+        {
+          "by": "label",
+          "value": "Verification code"
+        }
+      ]
+    },
+    {
+      "action": "submit",
+      "target": {
+        "by": "role",
+        "value": "button",
+        "name": "Verify"
+      }
+    }
+  ],
+  "verification": {
+    "sender": "noreply@example.com",
+    "subject": "Your verification code",
+    "recipient": {
+      "env": "EXAMPLE_EMAIL"
+    },
+    "code_regex": "\\b\\d{6}\\b",
+    "code_length": 6
+  },
+  "success": [
+    {
+      "type": "element",
+      "target": {
+        "by": "test_id",
+        "value": "account-menu"
+      }
+    },
+    {
+      "type": "url",
+      "pattern": "https://example.com/account*"
+    }
+  ],
+  "failure": [
+    {
+      "type": "element",
+      "target": {
+        "by": "test_id",
+        "value": "login-error"
+      }
+    }
+  ]
+}

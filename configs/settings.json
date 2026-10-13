@@ -1,0 +1,31 @@
+{
+  "browser": {
+    "engine": "chromium",
+    "headless": true,
+    "slow_mo_ms": 0,
+    "launch_timeout_ms": 30000
+  },
+  "timeouts": {
+    "action_ms": 5000,
+    "navigation_ms": 30000,
+    "login_seconds": 120,
+    "verification_seconds": 60
+  },
+  "gmail": {
+    "credentials_file": "secrets/gmail/credentials.json",
+    "token_file": "secrets/gmail/token.json",
+    "scopes": [
+      "https://www.googleapis.com/auth/gmail.modify"
+    ],
+    "poll_interval_seconds": 5,
+    "request_timeout_seconds": 30
+  },
+  "ai": {
+    "enabled": false,
+    "model": null,
+    "api_key": {
+      "env": "GOOGLE_API_KEY"
+    }
+  },
+  "artifacts_dir": "artifacts"
+}

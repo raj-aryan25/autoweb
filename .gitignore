@@ -1,0 +1,30 @@
+# Environments and Python caches
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local secrets and OAuth material
+.env
+.env.*
+!.env.example
+credentials.json
+token.json
+secrets/
+configs/settings.local.json
+configs/sites/*.local.json
+
+# Generated package/build output and session artifacts
+*.egg-info/
+build/
+dist/
+artifacts/
+playwright-report/
+test-results/
+*.storage-state.json
+
+# Historical material excluded from the active project
+trial-codes/
