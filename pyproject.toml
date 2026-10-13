@@ -26,6 +26,7 @@ test = ["pytest==7.4.3", "pytest-asyncio==0.21.1"]
 [project.scripts]
 autoweb-config = "autoweb.config.cli:main"
 autoweb-login = "autoweb.login.cli:main"
+autoweb-gmail = "autoweb.gmail.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

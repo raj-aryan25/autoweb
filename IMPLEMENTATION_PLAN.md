@@ -1,6 +1,6 @@
 # AutoWeb implementation plan
 
-Status: Phases I-III implemented at the user's request. Phases IV-VII remain pending.
+Status: Phases I-IV implemented at the user's request. Phases V-VII remain pending. Live Gmail/Gemini validation has not been performed.
 
 Phase I verification: editable installation in conda autoweb (Python 3.10.18); 49 configuration tests passed; schema-validation CLI passed; pip check reported no broken requirements. The installation repaired a pre-existing missing pytest dependency (exceptiongroup 1.3.1). Browser execution and live Gmail/Gemini validation remain in later phases.
 
@@ -126,19 +126,21 @@ Verification: 141 tests passed in conda autoweb, including both single-screen an
 
 ## Phase 4: Independent Gmail verification module
 
-- [ ] Separate OAuth setup from message retrieval and handle unusable or expired credentials clearly.
-- [ ] Preserve recursive MIME decoding; handle base64 padding, text/HTML selection, entities, and HTML links deliberately.
-- [ ] Correct the overescaped regex and validate code length/character rules; allow extraction without a capture group.
-- [ ] Use configured deterministic extraction first; enable Gemini only as an optional fallback with the same validation rules.
-- [ ] Filter by sender, recipient/account, subject, challenge timing, and baseline IDs; check message metadata rather than relying on unread status alone.
-- [ ] Handle pagination and candidate ordering so stale or unrelated messages cannot win by list order.
-- [ ] Poll until a valid result or deadline; continue past malformed/nonmatching candidates instead of stopping after the first batch.
-- [ ] Distinguish API/authentication failures from an empty mailbox; bound retries and API request duration.
-- [ ] Return one result through the verification-provider contract, including its source message ID.
-- [ ] Make email acknowledgment explicit; do not mark every fetched email read regardless of extraction or login success.
-- [ ] Preserve a standalone Gmail diagnostic script that does not perform website actions or reveal codes by default.
+- [x] Separate OAuth setup from message retrieval and handle unusable or expired credentials clearly.
+- [x] Preserve recursive MIME decoding; handle base64 padding, text/HTML selection, entities, and HTML links deliberately.
+- [x] Correct the overescaped regex and validate code length/character rules; allow extraction without a capture group.
+- [x] Use configured deterministic extraction first; enable Gemini only as an optional fallback with the same validation rules.
+- [x] Filter by sender, recipient/account, subject, challenge timing, and baseline IDs; check message metadata rather than relying on unread status alone.
+- [x] Handle pagination and candidate ordering so stale or unrelated messages cannot win by list order.
+- [x] Poll until a valid result or deadline; continue past malformed/nonmatching candidates instead of stopping after the first batch.
+- [x] Distinguish API/authentication failures from an empty mailbox; bound retries and API request duration.
+- [x] Return one result through the verification-provider contract, including its source message ID.
+- [x] Make email acknowledgment explicit; do not mark every fetched email read regardless of extraction or login success.
+- [x] Preserve a standalone Gmail diagnostic script that does not perform website actions or reveal codes by default.
 
 Acceptance: saved synthetic message fixtures cover plain text, HTML, nested MIME, leading zeros, multiple candidates, stale mail, malformed payloads, API failures, and timeout. Gmail can be exercised without importing the browser package.
+
+Verification: 226 tests passed in conda autoweb, including 83 new Gmail/OAuth/diagnostic/AI tests and two additional configuration checks. The suite retains the existing controlled Chromium/password-login coverage. Saved synthetic Gmail fixtures cover MIME decoding, HTML entities/links, charsets, leading zeros, ambiguous candidates, stale mail, malformed payloads, and fresh-message correlation. Fake transport tests cover pagination, bounded retries, deadlines, cancellation, token preservation, explicit acknowledgment, and optional structured AI validation. The editable installation was refreshed, autoweb-gmail --help passed, and pip check reported no broken requirements. No live Gmail, OAuth consent, Gemini, or external-site calls were made. See src/autoweb/gmail/README.md for opt-in authorization and fresh-mail diagnostics. Browser OTP orchestration remains Phase V.
 
 ## Phase 5: End-to-end email verification login
 

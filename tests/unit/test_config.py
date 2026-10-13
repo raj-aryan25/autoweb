@@ -81,6 +81,8 @@ def test_invalid_profile_is_rejected(project, change):
     lambda p: p.pop("verification"),
     lambda p: p["verification"].update(code_regex="["),
     lambda p: p["verification"].update(code_length=0),
+    lambda p: p["verification"].update(code_length=129),
+    lambda p: p["verification"].update(code_characters="["),
     lambda p: p["steps"][1].update(optional=True),
     lambda p: p["steps"].reverse(),
     lambda p: p["steps"][2].update(targets=[{"by": "css", "value": "#a"}, {"by": "css", "value": "#b"}]),

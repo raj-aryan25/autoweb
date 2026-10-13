@@ -1,0 +1,228 @@
+{
+  "plain": {
+    "id": "plain",
+    "internalDate": "1700000001000",
+    "payload": {
+      "headers": [
+        {
+          "name": "From",
+          "value": "Verification <noreply@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "test@example.com"
+        },
+        {
+          "name": "Subject",
+          "value": "Your verification code"
+        }
+      ],
+      "mimeType": "text/plain",
+      "body": {
+        "data": "WW91ciBjb2RlOiAwMDEyMzQ"
+      }
+    }
+  },
+  "html": {
+    "id": "html",
+    "internalDate": "1700000001000",
+    "payload": {
+      "headers": [
+        {
+          "name": "From",
+          "value": "Verification <noreply@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "test@example.com"
+        },
+        {
+          "name": "Subject",
+          "value": "Your verification code"
+        }
+      ],
+      "mimeType": "text/html",
+      "body": {
+        "data": "PGhlYWQ-PHRpdGxlPjk5OTk5OTwvdGl0bGU-PC9oZWFkPjxzY3JpcHQ-ODg4ODg4PC9zY3JpcHQ-PHA-Q29kZTombmJzcDs8Yj4wMDEyMzQ8L2I-PC9wPjxhIGhyZWY9Imh0dHBzOi8vZXhhbXBsZS5jb20vNjU0MzIxIj5Db250aW51ZTwvYT4"
+      }
+    }
+  },
+  "nested": {
+    "id": "nested",
+    "internalDate": "1700000001000",
+    "payload": {
+      "headers": [
+        {
+          "name": "From",
+          "value": "Verification <noreply@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "test@example.com"
+        },
+        {
+          "name": "Subject",
+          "value": "Your verification code"
+        }
+      ],
+      "mimeType": "multipart/mixed",
+      "parts": [
+        {
+          "mimeType": "text/html",
+          "body": {
+            "data": "Q29kZSA5OTk5OTk"
+          }
+        },
+        {
+          "mimeType": "multipart/alternative",
+          "parts": [
+            {
+              "mimeType": "text/plain",
+              "body": {
+                "data": "Q29kZSAwMDEyMzQ"
+              }
+            },
+            {
+              "filename": "secret.txt",
+              "mimeType": "text/plain",
+              "body": {
+                "data": "Q29kZSA3Nzc3Nzc"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "ambiguous": {
+    "id": "ambiguous",
+    "internalDate": "1700000001000",
+    "payload": {
+      "headers": [
+        {
+          "name": "From",
+          "value": "Verification <noreply@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "test@example.com"
+        },
+        {
+          "name": "Subject",
+          "value": "Your verification code"
+        }
+      ],
+      "mimeType": "text/plain",
+      "body": {
+        "data": "Q29kZSAwMDEyMzQgb3IgNjU0MzIx"
+      }
+    }
+  },
+  "stale": {
+    "id": "stale",
+    "internalDate": "1699999999000",
+    "payload": {
+      "headers": [
+        {
+          "name": "From",
+          "value": "Verification <noreply@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "test@example.com"
+        },
+        {
+          "name": "Subject",
+          "value": "Your verification code"
+        }
+      ],
+      "mimeType": "text/plain",
+      "body": {
+        "data": "Q29kZSAxMTExMTE"
+      }
+    }
+  },
+  "malformed": {
+    "id": "malformed",
+    "internalDate": "1700000001000",
+    "payload": {
+      "headers": [
+        {
+          "name": "From",
+          "value": "Verification <noreply@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "test@example.com"
+        },
+        {
+          "name": "Subject",
+          "value": "Your verification code"
+        }
+      ],
+      "mimeType": "text/plain",
+      "body": {
+        "data": "%%%bad%%%"
+      }
+    }
+  },
+  "alpha": {
+    "id": "alpha",
+    "internalDate": "1700000001000",
+    "payload": {
+      "headers": [
+        {
+          "name": "From",
+          "value": "Verification <noreply@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "test@example.com"
+        },
+        {
+          "name": "Subject",
+          "value": "Your verification code"
+        }
+      ],
+      "mimeType": "text/plain",
+      "body": {
+        "data": "Q29kZTogQUIwMVo5"
+      }
+    }
+  },
+  "malformed_nested": {
+    "id": "malformed_nested",
+    "internalDate": "1700000001000",
+    "payload": {
+      "headers": [
+        {
+          "name": "From",
+          "value": "Verification <noreply@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "test@example.com"
+        },
+        {
+          "name": "Subject",
+          "value": "Your verification code"
+        }
+      ],
+      "mimeType": "multipart/alternative",
+      "parts": [
+        {
+          "mimeType": "text/plain",
+          "body": {
+            "data": "%%%"
+          }
+        },
+        {
+          "mimeType": "text/html",
+          "body": {
+            "data": "PHA-Q29kZSAwMDEyMzQ8L3A-"
+          }
+        }
+      ]
+    }
+  }
+}

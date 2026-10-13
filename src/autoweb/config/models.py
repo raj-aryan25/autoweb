@@ -201,11 +201,12 @@ class VerificationSettings(Model):
     subject: NonEmpty | None = None
     recipient: EnvironmentReference
     code_regex: NonEmpty = r"\b\d{6}\b"
-    code_length: PositiveInt = 6
+    code_length: Annotated[int, Field(strict=True, gt=0, le=128)] = 6
+    code_characters: NonEmpty = r"[0-9]"
     timeout_seconds: PositiveNumber | None = None
     acknowledge: Literal["never", "on_success"] = "on_success"
 
-    @field_validator("code_regex")
+    @field_validator("code_regex", "code_characters")
     @classmethod
     def check_regex(cls, value: str) -> str:
         try:
