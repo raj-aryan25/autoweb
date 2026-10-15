@@ -73,6 +73,8 @@ See [configs/README.md](configs/README.md) for the schema and environment overri
 
 ## Tests
 
+For a step-by-step visible password demo and live Gmail checks, use the [manual verification walkthrough](docs/MANUAL_VERIFICATION.md). It lists the scripts, local configuration files, expected outcomes, and failure checks.
+
 ~~~powershell
 conda run -n autoweb python -m pytest -q
 ~~~
