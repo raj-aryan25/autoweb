@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from autoweb.browser import resolve_locator
-from autoweb.config.models import FillStep, SiteProfile
+from autoweb.config.models import FillOTPStep, FillStep, SiteProfile
 
 if TYPE_CHECKING:
     from playwright.async_api import Page
@@ -25,6 +25,9 @@ async def capture_failure(
         destination.parent.mkdir(parents=True, exist_ok=True)
         masks = [resolve_locator(page, step.target, include_hidden=True)
                  for step in profile.steps if isinstance(step, FillStep)]
+        masks.extend(resolve_locator(page, target, include_hidden=True)
+                     for step in profile.steps if isinstance(step, FillOTPStep)
+                     for target in step.targets)
         masks.append(page.locator('input[type="password"]'))
         await page.screenshot(path=str(destination), mask=masks, timeout=timeout_ms)
     except (Error, OSError):

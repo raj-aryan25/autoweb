@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "practice-test-login",
+  "entry_url": "https://practicetestautomation.com/practice-test-login/",
+  "login_mode": "password",
+  "credentials": {
+    "username": {"env": "PRACTICE_LOGIN_USERNAME"},
+    "password": {"env": "PRACTICE_LOGIN_PASSWORD"}
+  },
+  "steps": [
+    {"action": "fill", "target": {"by": "label", "value": "Username"}, "credential": "username"},
+    {"action": "fill", "target": {"by": "label", "value": "Password"}, "credential": "password"},
+    {"action": "submit", "target": {"by": "role", "value": "button", "name": "Submit"}, "timeout_ms": 30000}
+  ],
+  "success": [
+    {"type": "element", "target": {"by": "role", "value": "heading", "name": "Logged In Successfully"}},
+    {"type": "element", "target": {"by": "role", "value": "link", "name": "Log out"}},
+    {"type": "url", "pattern": "https://practicetestautomation.com/logged-in-successfully/"}
+  ],
+  "failure": [
+    {"type": "element", "target": {"by": "css", "value": "#error.show"}}
+  ]
+}

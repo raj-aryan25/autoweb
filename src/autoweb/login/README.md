@@ -1,6 +1,6 @@
-# Password login
+# Password and email verification login
 
-Phase III executes one selected, validated password-login profile. Gmail, OTP retrieval, signup, social login, and AI discovery remain later work. The original websites in shadowdom-auto/tasks/tasks.json are legacy demonstrations; they are not automatically migrated or executed by this runner.
+The runner executes one selected, validated password, email OTP, or password-plus-email-OTP profile. Phase V connects an injected verification provider to the same browser session. Signup, social login, and AI discovery remain later work. The original websites in shadowdom-auto/tasks/tasks.json are legacy demonstrations; they are not automatically migrated or executed by this runner. See [environment and live-site setup](../../../docs/EMAIL_LOGIN_SETUP.md) for the exact files to customize.
 
 ## What runs
 
@@ -49,19 +49,23 @@ Run async functions through pytest or an async application entry point in conda 
 
 For a session whose lifetime you already own, use run_login(session, configuration). It returns the same active session on success and does not close caller-owned resources. If it fails, the owner must still close its context.
 
-Success returns LoginResult with site, status, elapsed_seconds, completed/skipped step results, and the active session. Failure raises LoginError with a structured failed result containing failed_step, reason, and available local artifact paths. Failure results do not expose a supposedly authenticated session. Unresolved credentials and unsupported OTP modes are rejected before browser startup.
+Success returns LoginResult with site, status, elapsed_seconds, completed/skipped step results, and the active session. Failure raises LoginError with a structured failed result containing failed_step, reason, and available local artifact paths. Failure results do not expose a supposedly authenticated session. Unresolved credentials are rejected before browser startup.
+
+For OTP modes, `authenticated_session(configuration, verification_provider=None)` opens an owned Gmail provider before the browser when none is supplied. OAuth setup remains explicit and separate. Pass a fake or application-owned provider to avoid Gmail initialization. `run_login(session, configuration, verification_provider)` requires an explicit provider for email modes and never closes caller-owned resources. Providers implement the protocol in `autoweb.contracts` and raise `VerificationError` with a static, secret-safe reason. Gmail implements this contract without importing the browser/login packages.
+
+The baseline is captured before `request_otp`; a timezone-aware timestamp is taken immediately before the request click. One challenge deadline covers baseline, request, receive, fill, submit, authentication, and acknowledgment, capped by the overall login deadline. Polling uses the challenge budget independently of browser action timeouts. Single and split OTP fields preserve leading zeros. Optional `verification.rejected`/`expired` assertions distinguish rejected and expired codes. No request, submit, or resend is automatically retried. Only proven authentication allows `on_success` acknowledgment; `never` leaves mail untouched. An acknowledgment failure is reported at that stage without resubmitting the form.
 
 ## Diagnostics and command line
 
-Failures attempt a bounded screenshot under artifacts/login-failures/. Configured identifier/password inputs and password-type inputs are masked. Screenshot failures do not replace the original login error. Filled values, cookie tokens, response bodies, and raw Playwright DOM dumps are excluded from result/error messages. Broader trace/reporting support belongs to Phase VI.
+Failures attempt a bounded screenshot under artifacts/login-failures/. Configured identifier/password/OTP inputs and password-type inputs are masked. Screenshot failures do not replace the original login error. Filled values, cookie tokens, response bodies, and raw Playwright DOM dumps are excluded from result/error messages. Broader trace/reporting support belongs to Phase VI.
 
-The CLI validates one selected site profile, runs its password flow, reports success/failure, and closes the session. Use the Python context manager for post-login work:
+The CLI validates one selected site profile, runs its login flow, reports success/failure, and closes the session. Use the Python context manager for post-login work:
 
 ~~~powershell
 conda run -n autoweb python -m autoweb.login --site configs/sites/local-password.example.json --env-file configs/demo.env.example
 ~~~
 
-Equivalent entry points are scripts/run_login.py and the installed autoweb-login command. Options include --settings, --project-root, --env-file, and --headed. Exit codes are 0 for confirmed login, 1 for login/browser failure, 2 for invalid configuration, and 130 for interruption. Credentials are never supplied as command-line arguments.
+Equivalent entry points are scripts/run_login.py and the installed autoweb-login command. Options include --settings, --project-root, --env-file, --headed, and --slowmo [MS]. Use --slowmo for a 700 ms delay per browser action or --slowmo 1200 for a custom delay. This overrides the configured delay for this run in both headed and headless modes; --slowmo 0 disables a configured delay. Without the flag, the existing settings/environment value applies (default 0). Exit codes are 0 for confirmed login, 1 for login/browser failure, 2 for invalid configuration, and 130 for interruption. Credentials are never supplied as command-line arguments.
 
 ## Local demo
 

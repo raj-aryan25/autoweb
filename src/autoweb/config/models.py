@@ -205,6 +205,8 @@ class VerificationSettings(Model):
     code_characters: NonEmpty = r"[0-9]"
     timeout_seconds: PositiveNumber | None = None
     acknowledge: Literal["never", "on_success"] = "on_success"
+    rejected: list[Assertion] = Field(default_factory=list)
+    expired: list[Assertion] = Field(default_factory=list)
 
     @field_validator("code_regex", "code_characters")
     @classmethod
@@ -235,7 +237,9 @@ class SiteProfile(Model):
 
     @model_validator(mode="after")
     def check_flow(self) -> SiteProfile:
-        for condition in self.success + self.failure:
+        challenge_checks = (self.verification.rejected + self.verification.expired
+                            if self.verification else [])
+        for condition in self.success + self.failure + challenge_checks:
             if (isinstance(condition, APIAssertion) and not condition.url.startswith("/")
                     and _origin(condition.url) != _origin(self.entry_url)):
                 raise ValueError("API assertions must use the login site origin")

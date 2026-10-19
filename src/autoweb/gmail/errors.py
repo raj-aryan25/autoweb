@@ -1,10 +1,12 @@
 """Static, secret-safe errors; provider exceptions and response bodies stay private."""
 
+from autoweb.contracts import VerificationError
 
-class GmailError(Exception):
+
+class GmailError(VerificationError):
     def __init__(self, reason: str):
-        self.reason = reason
-        super().__init__(f"Gmail verification failed: {reason}")
+        super().__init__(reason)
+        self.args = (f"Gmail verification failed: {reason}",)
 
 
 class GmailAuthenticationError(GmailError):

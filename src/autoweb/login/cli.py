@@ -1,10 +1,11 @@
-"""Thin password-login runner for one selected site profile."""
+"""Thin password/email-OTP login runner for one selected site profile."""
 
 import argparse
 import asyncio
 
 from autoweb.browser import BrowserError
 from autoweb.config import ConfigurationError, load_configuration
+from autoweb.contracts import VerificationError
 
 from .errors import LoginError
 from .flow import authenticated_session
@@ -22,17 +23,25 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--project-root")
     parser.add_argument("--env-file")
     parser.add_argument("--headed", action="store_true", help="Show the browser during login")
+    parser.add_argument(
+        "--slowmo", nargs="?", const=700, type=int, metavar="MS",
+        help="Slow browser actions by MS milliseconds (default when supplied: 700; 0 disables)",
+    )
     args = parser.parse_args(argv)
+    if args.slowmo is not None and args.slowmo < 0:
+        parser.error("--slowmo must be a nonnegative number of milliseconds")
     try:
         configuration = load_configuration(
             args.site, args.settings, project_root=args.project_root, env_file=args.env_file,
         )
         if args.headed:
             configuration.settings.browser.headless = False
+        if args.slowmo is not None:
+            configuration.settings.browser.slow_mo_ms = args.slowmo
         asyncio.run(_run(configuration))
     except ConfigurationError as error:
         parser.exit(2, f"Configuration error: {error}\n")
-    except (LoginError, BrowserError) as error:
+    except (LoginError, BrowserError, VerificationError) as error:
         parser.exit(1, f"{error}\n")
     except KeyboardInterrupt:
         parser.exit(130, "Login interrupted\n")

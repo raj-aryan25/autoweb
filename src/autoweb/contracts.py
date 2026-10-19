@@ -7,6 +7,14 @@ import math
 import re
 
 
+class VerificationError(Exception):
+    """Provider-neutral failure carrying a static, secret-safe reason."""
+
+    def __init__(self, reason: str):
+        self.reason = reason
+        super().__init__(f"Verification failed: {reason}")
+
+
 @dataclass(frozen=True)
 class ActionResult:
     action: str

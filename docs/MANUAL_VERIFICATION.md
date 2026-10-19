@@ -1,8 +1,11 @@
-# Manual verification of Phases I-IV
+# Manual verification of Phases I-V
 
 Use PowerShell. Run all commands from `D:/RAJ ARYAN/Codec/AutoWeb` in conda
 `autoweb`. Password browser login and Gmail retrieval are independently runnable.
-The browser does not yet request or submit email codes; that is Phase V.
+Phase V also connects Gmail verification to browser login. Follow
+[Phase V setup](EMAIL_LOGIN_SETUP.md) for the public practice-site password test,
+the exact environment files to edit, and subsequent opt-in email login setup.
+On Linux, use the checkout at `/home/raj/Codec/autoweb`.
 
 ## 1. Prepare the environment
 
@@ -25,7 +28,7 @@ conda run -n autoweb python -m pytest -q
 conda run -n autoweb python -m autoweb.config --site configs/sites/local-password.example.json --env-file configs/demo.env.example
 ```
 
-The current full suite has 226 tests. It uses local Chromium sites and fake Gmail,
+The full suite uses local Chromium sites and fake Gmail,
 OAuth, and Gemini boundaries. Expect all tests to pass and the configuration
 command to print `Valid configuration and credential references`.
 
@@ -280,7 +283,9 @@ or same-origin session/API assertions where appropriate.
 
 Validate the profile, then run it with `scripts/run_login.py --site ... --headed`.
 The example.com examples are schema examples, not ready-made real-site integrations.
-Sites requiring email OTP cannot yet complete through this runner.
+Sites requiring email OTP can use the Phase V runner after profile and OAuth setup;
+follow [email login setup](EMAIL_LOGIN_SETUP.md). The selected public password demo
+uses `configs/sites/practice-test-login.json` and requires no OAuth.
 
 ## Troubleshooting
 
@@ -295,7 +300,8 @@ Sites requiring email OTP cannot yet complete through this runner.
 | `token_invalid`, `token_refresh_failed`, `oauth_scopes_insufficient` | Check the token path; authorize again if needed |
 | `mailbox_access_denied` | Check Gmail API enablement, mailbox authorization, and scopes |
 | `verification_timeout` | Check exact sender/recipient, subject, code rules, fresh timing, and timeout |
-| `unsupported_login_mode` | OTP browser orchestration is Phase V and remains pending |
+| `verification_rejected`, `verification_expired` | Inspect the site's configured challenge error state; automatic resend is disabled |
 
 The deterministic suite verifies acknowledgment and API failure handling without
-modifying real messages. This walkthrough performs no automatic website OTP flow.
+modifying real messages. Independent Gmail diagnostics do not perform website actions;
+the login runner performs the configured request/fill/submit flow when selected explicitly.

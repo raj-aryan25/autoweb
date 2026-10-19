@@ -50,7 +50,14 @@
       "env": "EXAMPLE_EMAIL"
     },
     "code_regex": "\\b\\d{6}\\b",
-    "code_length": 6
+    "code_length": 6,
+    "acknowledge": "on_success",
+    "rejected": [
+      {"type": "element", "target": {"by": "test_id", "value": "otp-error"}}
+    ],
+    "expired": [
+      {"type": "element", "target": {"by": "test_id", "value": "otp-expired"}}
+    ]
   },
   "success": [
     {

@@ -1,0 +1,3 @@
+# Install AutoWeb with Gmail, optional AI extraction, and test dependencies.
+# Dependency versions are maintained in pyproject.toml.
+-e .[gmail,ai,test]

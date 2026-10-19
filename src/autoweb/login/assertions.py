@@ -64,9 +64,15 @@ async def _matches(page: Page, condition: Assertion, deadline: float, base_url: 
                 await response.dispose()
         raise ValueError("Unsupported authentication assertion")
 
+    # Playwright 1.40 protocol waits are not cancellation-safe: cancelling them
+    # during navigation can leave an unobserved protocol exception. Let this
+    # read-only probe settle (or fail when the context closes), observing its
+    # result even when the surrounding watcher/deadline has already stopped.
+    probe_task = asyncio.create_task(probe())
+    probe_task.add_done_callback(lambda task: task.exception() if not task.cancelled() else None)
     try:
         # Missing frames/endpoints must not block other rejection checks indefinitely.
-        return await asyncio.wait_for(probe(), timeout=min(remaining, 1))
+        return await asyncio.wait_for(asyncio.shield(probe_task), timeout=min(remaining, 1))
     except (asyncio.TimeoutError, TimeoutError):
         return False
     except Error as error:
@@ -96,15 +102,23 @@ async def _pause(deadline: float) -> None:
 
 async def watch_for_rejection(page: Page, profile: SiteProfile, deadline: float) -> None:
     while True:
-        if await _rejected(page, profile.failure, deadline, profile.entry_url):
-            raise BrowserActionError("authentication", "credentials_rejected")
+        await check_rejection(page, profile, deadline)
         await _pause(deadline)
+
+
+async def check_rejection(page: Page, profile: SiteProfile, deadline: float) -> None:
+    if profile.verification:
+        for conditions, reason in ((profile.verification.expired, "verification_expired"),
+                                   (profile.verification.rejected, "verification_rejected")):
+            if await _rejected(page, conditions, deadline, profile.entry_url):
+                raise BrowserActionError("authentication", reason)
+    if await _rejected(page, profile.failure, deadline, profile.entry_url):
+        raise BrowserActionError("authentication", "credentials_rejected")
 
 
 async def wait_for_authentication(page: Page, profile: SiteProfile, deadline: float) -> None:
     while True:
-        if await _rejected(page, profile.failure, deadline, profile.entry_url):
-            raise BrowserActionError("authentication", "credentials_rejected")
+        await check_rejection(page, profile, deadline)
         confirmed = True
         for condition in profile.success:
             if not await _matches(page, condition, deadline, profile.entry_url):
@@ -112,7 +126,6 @@ async def wait_for_authentication(page: Page, profile: SiteProfile, deadline: fl
                 break
         if confirmed:
             # Failure wins even when a page also exposes an apparent success control.
-            if await _rejected(page, profile.failure, deadline, profile.entry_url):
-                raise BrowserActionError("authentication", "credentials_rejected")
+            await check_rejection(page, profile, deadline)
             return
         await _pause(deadline)

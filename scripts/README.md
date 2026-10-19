@@ -2,7 +2,7 @@
 
 Configuration validation is available through `python -m autoweb.config` and `autoweb-config`.
 
-Password login runs through `python -m autoweb.login`, `autoweb-login`, or this folder's thin `run_login.py` wrapper. See [the login documentation](../src/autoweb/login/README.md) for configuration, session reuse, and a controlled local demo.
+Password and email OTP login run through `python -m autoweb.login`, `autoweb-login`, or this folder's thin `run_login.py` wrapper. See [the login documentation](../src/autoweb/login/README.md) for configuration, session reuse, and a controlled local demo, and [Phase V setup](../docs/EMAIL_LOGIN_SETUP.md) for the practice-site command and environment files.
 
 For a visible local demo including a protected action and an observation window, use `check_local_login.py` after starting the fixture server. See the [manual verification walkthrough](../docs/MANUAL_VERIFICATION.md) for exact setup, success/failure checks, and files to customize for Gmail.
 

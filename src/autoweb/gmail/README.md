@@ -1,8 +1,10 @@
 # Independent Gmail verification
 
 Phase IV retrieves one fresh verification code without importing Playwright or
-performing website actions. Phase V will inject this provider into login flows.
-The current password runner still rejects OTP login modes.
+performing website actions. Phase V injects this provider into login flows for
+OTP-only and password-plus-OTP profiles, keeping the same browser context. See
+[email login setup](../../../docs/EMAIL_LOGIN_SETUP.md) for environment files and
+execution. This diagnostic remains independent and never submits a website code.
 
 ## Setup
 
