@@ -51,7 +51,7 @@ def matching_timestamp(message: dict, request: VerificationRequest) -> datetime 
         received = datetime.fromtimestamp(int(message["internalDate"]) / 1000, timezone.utc)
     except (KeyError, ValueError, TypeError, OverflowError, OSError):
         return None
-    if not request.challenge_started_at <= received <= datetime.now(timezone.utc):
+    if not request.matches_received_at(received):
         return None
     meta = headers(payload)
     senders = [address.casefold() for _, address in getaddresses(meta.get("from", []))]

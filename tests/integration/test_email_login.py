@@ -201,6 +201,20 @@ async def test_never_acknowledgment_policy(email_site, email_configuration):
         assert not provider.acknowledged
 
 
+async def test_login_accepts_fresh_whole_second_provider_timestamp(email_site, email_configuration):
+    provider = FakeProvider(email_site)
+    original = provider.receive
+
+    async def coarse_timestamp(request):
+        result = await original(request)
+        return replace(result, received_at=request.challenge_started_at.replace(microsecond=0))
+
+    provider.receive = coarse_timestamp
+    async with authenticated_session(email_configuration(), provider) as result:
+        assert result.status == "succeeded"
+        assert provider.acknowledged == ["fresh-message"]
+
+
 async def test_baseline_failure_never_requests_email(email_site, email_configuration):
     provider = FakeProvider(email_site)
 

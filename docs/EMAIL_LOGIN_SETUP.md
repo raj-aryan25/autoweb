@@ -56,6 +56,40 @@ All relative paths resolve against the repository root. To use another root or
 dotenv file, pass `--project-root` or `--env-file`. See
 [all environment overrides](../configs/README.md).
 
+## Expand Testing email OTP profile
+
+`configs/sites/expandtesting-otp.example.json` targets
+<https://practice.expandtesting.com/otp-login>. Set `EXPANDTESTING_EMAIL` in the
+root `.env` to the receiving Gmail address, and authorize that same Gmail account
+with the existing OAuth command below. The OAuth client JSON belongs in
+`secrets/gmail/credentials.json`; authorization creates `secrets/gmail/token.json`.
+
+The observed sender is `noreply.practice@expandtesting.com`, with subject
+`[Practice WebSite] OTP Login Code`. The profile requests a fresh six-digit code,
+waits for the verification form, fills `#otp`, and checks the secure-page heading,
+Logout link, and `/secure` URL. Its challenge timeout is 90 seconds, which must
+fit within the configured total login timeout (120 seconds by default). Email
+delivery can be delayed; a visible OTP form alone does not prove delivery.
+Freshness compares whole-second email timestamps with the challenge's second;
+fractional timestamps retain the precise challenge lower bound. Baseline IDs are
+always excluded, including messages in the same second. This accounts for the
+timestamp precision observed in this site's real Gmail messages.
+
+```sh
+conda run --no-capture-output -n autoweb python -m autoweb.login --site configs/sites/expandtesting-otp.example.json --headed --slowmo
+```
+
+This smoke profile uses `acknowledge: never`, so successful tests leave Gmail
+message labels unchanged. Copy it to `expandtesting-otp.local.json` for local
+changes, including `acknowledge: on_success` if you want the consumed message
+marked read. The site's published demo account/code can test browser controls
+without email, but cannot verify Gmail integration.
+
+Live verification passed after explicit OAuth authorization: a fresh Gmail code
+was retrieved and submitted through AutoWeb, all success assertions passed, the
+same browser session accessed the protected page again, and logout revoked access.
+No real OTP values or tokens were printed.
+
 ## Email login after OAuth setup is requested
 
 Copy `configs/sites/email-otp.example.json` or
@@ -120,5 +154,6 @@ conda run -n autoweb python -m pytest -q
 ```
 
 The deterministic tests use local Chromium, a fake provider, and the real Gmail
-poller over a synthetic mailbox. No live Gmail or Gemini calls are made. Live
-email verification remains opt-in and needs a site that actually sends an OTP.
+poller over a synthetic mailbox. They make no live Gmail or Gemini calls. Live
+email verification is opt-in; the separate Expand Testing smoke run described
+above used a real Gmail OTP and passed.

@@ -1,6 +1,6 @@
 # AutoWeb implementation plan
 
-Status: Phases I-V implemented at the user's request, with live Gmail/site OTP validation still pending. Phase V deterministic email-login coverage is complete; the selected public password-demo smoke test passed. OAuth setup and live Gmail validation are deferred at the user's request. Phases VI-VII remain pending.
+Status: Phases I-V implemented and verified at the user's request. Both the public password-demo smoke test and Expand Testing live Gmail OTP login passed. The user completed Gmail OAuth consent explicitly. Phases VI-VII remain pending.
 
 Phase I verification: editable installation in conda autoweb (Python 3.10.18); 49 configuration tests passed; schema-validation CLI passed; pip check reported no broken requirements. The installation repaired a pre-existing missing pytest dependency (exceptiongroup 1.3.1). Browser execution and live Gmail/Gemini validation remain in later phases.
 
@@ -151,13 +151,17 @@ Verification: 226 tests passed in conda autoweb, including 83 new Gmail/OAuth/di
 - [x] Detect incorrect/expired codes and challenge transitions; bound any resend/retry and refresh correlation data for a new challenge.
 - [x] Avoid automatic retries of non-idempotent submit/resend actions without inspecting the resulting state.
 - [x] Verify actual authentication before reporting success or acknowledging the email.
-- [ ] Perform an opt-in live Gmail/site smoke test when a target test account and site profile are available.
+- [x] Perform an opt-in live Gmail/site smoke test when a target test account and site profile are available.
 
 Acceptance: deterministic tests complete all three login modes and a protected action afterward. No-code, stale-code, wrong-code, and expired-code cases fail predictably without consuming unrelated mail.
 
 Implementation: the core runner accepts the provider protocol; the owned-session entry point lazily initializes Gmail before browser startup. Email flows preserve the active context and one deadline through baseline, request, polling, submission, authentication, and acknowledgment. Incorrect/expired-code assertions have distinct failure reasons; provider results are validated before entry and OTP inputs are masked in diagnostics. Automatic resend/retry count is zero. Each explicitly started attempt establishes fresh correlation data. Provider startup/cleanup, missing mail, stale/baseline/account-mismatched results, blocked submission, failed authentication, acknowledgment errors, and cancellation have deterministic coverage. See docs/EMAIL_LOGIN_SETUP.md for environment files and opt-in live setup. The public Practice Test Automation password profile passed its three success assertions without OAuth; this site does not exercise email verification.
 
-Verification: the full deterministic suite passed 248 tests in conda autoweb. After a final assertion-cancellation fix (preventing unobserved Playwright protocol errors during navigation), all 51 affected login tests passed, including the new regression test. The live password CLI then passed cleanly with three completed steps. No live Gmail, OAuth consent, or Gemini calls were made. Live OTP validation remains the unchecked item above; Phase VI has not started.
+Initial verification: the full deterministic suite passed 248 tests in conda autoweb. After an assertion-cancellation fix (preventing unobserved Playwright protocol errors during navigation), all 51 affected login tests passed, including the new regression test. The live password CLI then passed cleanly with three completed steps. At that stage, no live Gmail, OAuth consent, or Gemini calls had been made; the subsequent live OTP verification is recorded below.
+
+Live Gmail/site verification: after explicit user OAuth authorization, AutoWeb completed real email OTP login at https://practice.expandtesting.com/otp-login. The observed sender is noreply.practice@expandtesting.com, with subject [Practice WebSite] OTP Login Code. All authenticated UI/URL assertions passed, a second protected-page visit reused the same session, and logout invalidated protected access. OTPs/tokens were not logged; the smoke profile uses acknowledge=never so message labels were unchanged. This test exposed whole-second Gmail internalDate precision: a fresh message appeared 244 ms earlier than the microsecond challenge timestamp. A shared freshness check now compares whole-second mail at second precision while retaining precise checks for fractional timestamps, rejecting older seconds and always excluding baseline IDs. Six regression cases were added; 91 focused Gmail/email-login tests passed. Phase VI has not started.
+
+Final verification: all 255 deterministic tests passed in conda autoweb after the live-test fix. The Expand Testing example profile passed schema and credential preflight, and git diff whitespace checks passed.
 
 ## Phase 6: Testing framework entry points and diagnostics
 

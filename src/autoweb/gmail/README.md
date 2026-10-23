@@ -59,8 +59,8 @@ conda run -n autoweb python -m autoweb.gmail --site configs/sites/my-site.local.
 Equivalent entry points are `autoweb-gmail` and `scripts/read_verification.py`.
 The diagnostic captures a mailbox baseline, then prints **Request a new
 verification email now**. Request the code manually on your test website at that
-point. Mail already present at baseline or received before the challenge timestamp
-cannot satisfy the diagnostic. It never navigates to a website or marks mail read.
+point. Mail already present at baseline or older than the challenge at the email's
+timestamp precision cannot satisfy the diagnostic. It never navigates to a website or marks mail read.
 Codes are hidden by default; `--show-code` explicitly enables sensitive output.
 No message bodies or OAuth tokens appear in diagnostic output.
 
@@ -104,7 +104,9 @@ fail explicitly; shared-mailbox parallelism across providers is later work.
 - Server queries use sender, recipient (`to`, `cc`, or `deliveredto`), subject,
   and coarse epoch-second time filters. They never require `UNREAD`.
 - Full metadata is checked again: exact sender/recipient addresses, case-insensitive
-  subject substring, and Gmail `internalDate` at or after the challenge timestamp.
+  subject substring, and Gmail `internalDate` at or after the challenge timestamp
+  at the received timestamp's precision. Whole-second timestamps are compared
+  with the challenge's second; fractional timestamps keep the precise lower bound.
   Future timestamps, baseline IDs, mismatched IDs, and missing metadata are rejected.
   Recipient checks also support Bcc and original/delivery headers. Configure aliases
   explicitly; the Gmail API does not expand aliases like the Gmail UI.

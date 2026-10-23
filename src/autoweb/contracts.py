@@ -1,7 +1,7 @@
 """Shared action results and verification contracts, independent of provider implementations."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal, Protocol
 import math
 import re
@@ -60,6 +60,21 @@ class VerificationRequest:
         except (re.error, TypeError):
             raise ValueError("Invalid verification regular expression") from None
         object.__setattr__(self, "baseline_ids", frozenset(self.baseline_ids))
+
+    def matches_received_at(self, received_at: datetime) -> bool:
+        """Check freshness at the received timestamp's available precision.
+
+        Some SMTP messages expose only whole seconds through Gmail internalDate.
+        Such a timestamp cannot establish subsecond ordering, so compare it with
+        the challenge's second. Baseline IDs must still be excluded separately.
+        Timestamps with fractional seconds retain the precise lower bound.
+        """
+        if not isinstance(received_at, datetime) or received_at.utcoffset() is None:
+            return False
+        lower_bound = self.challenge_started_at
+        if received_at.microsecond == 0:
+            lower_bound = lower_bound.replace(microsecond=0)
+        return lower_bound <= received_at <= datetime.now(timezone.utc)
 
 
 @dataclass(frozen=True)

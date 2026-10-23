@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "expandtesting-otp",
+  "entry_url": "https://practice.expandtesting.com/otp-login",
+  "login_mode": "email_otp",
+  "credentials": {"email": {"env": "EXPANDTESTING_EMAIL"}},
+  "steps": [
+    {"action": "fill", "credential": "email", "target": {"by": "label", "value": "Your Email Address"}},
+    {"action": "request_otp", "target": {"by": "role", "value": "button", "name": "Send OTP Code"}, "timeout_ms": 30000},
+    {"action": "wait_for", "target": {"by": "role", "value": "button", "name": "Verify OTP Code"}, "timeout_ms": 15000},
+    {"action": "fill_otp", "targets": [{"by": "css", "value": "#otp"}]},
+    {"action": "submit", "target": {"by": "role", "value": "button", "name": "Verify OTP Code"}, "timeout_ms": 30000}
+  ],
+  "verification": {
+    "sender": "noreply.practice@expandtesting.com",
+    "subject": "[Practice WebSite] OTP Login Code",
+    "recipient": {"env": "EXPANDTESTING_EMAIL"},
+    "code_regex": "\\b\\d{6}\\b",
+    "code_length": 6,
+    "timeout_seconds": 90,
+    "acknowledge": "never"
+  },
+  "success": [
+    {"type": "element", "target": {"by": "role", "value": "heading", "name": "Secure Area page for Automation Testing Practice"}},
+    {"type": "element", "target": {"by": "role", "value": "link", "name": "Logout"}},
+    {"type": "url", "pattern": "https://practice.expandtesting.com/secure"}
+  ]
+}

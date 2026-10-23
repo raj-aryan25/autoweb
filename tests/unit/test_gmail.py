@@ -145,6 +145,30 @@ def test_recipient_delivery_header_and_encoded_subject_are_supported():
     assert matching_timestamp(message, request()) is not None
 
 
+@pytest.mark.parametrize("offset_ms,accepted", [(0, True), (-1000, False), (1000, True), (250, False)])
+def test_received_timestamp_precision_preserves_freshness_boundary(offset_ms, accepted):
+    # The challenge starts halfway through a second. A whole-second timestamp
+    # cannot be ordered within that second; fractional timestamps still can.
+    challenge = START + timedelta(microseconds=500000)
+    message = copy.deepcopy(FIXTURES["plain"])
+    message["internalDate"] = str(int((START + timedelta(milliseconds=offset_ms)).timestamp() * 1000))
+    assert (matching_timestamp(message, request(challenge_started_at=challenge)) is not None) == accepted
+
+
+@pytest.mark.asyncio
+async def test_whole_second_message_is_selected_but_same_second_baseline_is_not_reused():
+    messages = copy.deepcopy(FIXTURES)
+    messages["plain"]["internalDate"] = str(int(START.timestamp() * 1000))
+    challenge = START + timedelta(microseconds=750000)
+    gmail = provider(FakeClient([["plain"]], messages))
+    result = await gmail.receive(request(challenge_started_at=challenge))
+    assert result.message_id == "plain" and result.value == "001234"
+    gmail = provider(FakeClient([["plain"]], messages))
+    with pytest.raises(VerificationTimeout):
+        await gmail.receive(request(challenge_started_at=challenge, baseline_ids={"plain"},
+                                    deadline=monotonic() + 0.02))
+
+
 @pytest.mark.asyncio
 async def test_baseline_then_poll_skips_old_malformed_and_continues_to_next_batch():
     client = FakeClient([["plain"], ["plain", "stale", "malformed"], ["plain", "stale", "malformed", "html"]])

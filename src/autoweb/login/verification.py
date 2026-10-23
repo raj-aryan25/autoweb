@@ -49,9 +49,7 @@ class EmailChallenge:
         if (not isinstance(result, VerificationResult)
                 or result.site != request.site or result.account != request.account
                 or not result.message_id or result.message_id in request.baseline_ids
-                or not isinstance(result.received_at, datetime)
-                or result.received_at.utcoffset() is None
-                or not request.challenge_started_at <= result.received_at <= datetime.now(timezone.utc)
+                or not request.matches_received_at(result.received_at)
                 or not isinstance(result.value, str) or len(result.value) != request.code_length
                 or not all(re.fullmatch(request.code_characters, char) for char in result.value)):
             raise VerificationError("verification_result_invalid")

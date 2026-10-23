@@ -21,5 +21,5 @@
 ## Current authorization
 
 - The user has authorized Phase V (end-to-end email verification login) of IMPLEMENTATION_PLAN.md. Keep implementation within that phase until the user requests a subsequent phase.
-- Active framework code lives in src/autoweb/. Phases I-IV and the standalone repository migration are complete. Do not start Phase VI until requested. Legacy projects and OAuth files remain in the original repository. The user selected Practice Test Automation for a password smoke test and deferred OAuth setup until after that test; do not initiate OAuth consent automatically.
+- Active framework code lives in src/autoweb/. Phases I-V and the standalone repository migration are complete. Do not start Phase VI until requested. Legacy projects and OAuth files remain in the original repository. Practice Test Automation password login and Expand Testing live Gmail OTP login have passed. The user completed Gmail OAuth consent explicitly; do not initiate OAuth consent automatically.
 - Use pyproject.toml as the single dependency definition. Avoid browser, Gmail, or AI client initialization during package imports.

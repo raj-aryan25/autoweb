@@ -85,4 +85,4 @@ Tests cover profile validation, credential resolution, secret-safe output, paths
 
 AutoWeb is a standalone repository containing the modular framework implemented through Phase V. Legacy sources remain in D:/RAJ ARYAN/Codec/scaile-tech/scaile-backlink: gmail-auto/ provided reference code for Phase IV, and shadowdom-auto/ contains the earlier browser automation. They are not runtime dependencies of AutoWeb. Historical trial-codes/ experiments are excluded.
 
-Future work follows IMPLEMENTATION_PLAN.md. Deterministic email login tests require no live mailbox. Live Gmail/Gemini validation remains opt-in and has not been performed; OAuth setup is deferred at the user's request.
+Future work follows IMPLEMENTATION_PLAN.md. Deterministic email login tests require no live mailbox. An opt-in live Gmail OTP smoke test passed against Expand Testing after explicit OAuth authorization, including protected-session reuse and logout. See [setup and the runnable OTP profile](docs/EMAIL_LOGIN_SETUP.md). Live Gemini validation has not been performed.
