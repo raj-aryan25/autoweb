@@ -1,6 +1,6 @@
 # AutoWeb implementation plan
 
-Status: Phases I-V implemented and verified at the user's request. Both the public password-demo smoke test and Expand Testing live Gmail OTP login passed. The user completed Gmail OAuth consent explicitly. Phases VI-VII remain pending.
+Status: Phases I-VI implemented and verified at the user's request. Both the public password-demo smoke test and Expand Testing live Gmail OTP login passed during Phase V. The user completed Gmail OAuth consent explicitly. Phase VII remains pending.
 
 Phase I verification: editable installation in conda autoweb (Python 3.10.18); 49 configuration tests passed; schema-validation CLI passed; pip check reported no broken requirements. The installation repaired a pre-existing missing pytest dependency (exceptiongroup 1.3.1). Browser execution and live Gmail/Gemini validation remain in later phases.
 
@@ -165,16 +165,20 @@ Final verification: all 255 deterministic tests passed in conda autoweb after th
 
 ## Phase 6: Testing framework entry points and diagnostics
 
-- [ ] Use pytest with async fixtures aligned with the existing async Playwright API; keep browser/context ownership in one fixture layer.
-- [ ] Provide fixtures for settings, site profiles, isolated browser sessions, and real/fake verification providers.
-- [ ] Keep production login functions independent of pytest and usable from a thin standalone runner.
-- [ ] Separate fast unit tests, controlled browser integration tests, and explicitly selected live-site tests.
-- [ ] Parameterize login tests by site profile and ensure failures produce nonzero test/runner outcomes.
-- [ ] Record concise step results, failure screenshots, and Playwright traces with sensitive-data handling.
-- [ ] Document optional session-state reuse and expiry checks; default test isolation remains explicit.
-- [ ] Update README setup, conda autoweb commands, profile authoring, standalone scripts, and test examples.
+- [x] Use pytest with async fixtures aligned with the existing async Playwright API; keep browser/context ownership in one fixture layer.
+- [x] Provide fixtures for settings, site profiles, isolated browser sessions, and real/fake verification providers.
+- [x] Keep production login functions independent of pytest and usable from a thin standalone runner.
+- [x] Separate fast unit tests, controlled browser integration tests, and explicitly selected live-site tests.
+- [x] Parameterize login tests by site profile and ensure failures produce nonzero test/runner outcomes.
+- [x] Record concise step results, failure screenshots, and Playwright traces with sensitive-data handling.
+- [x] Document optional session-state reuse and expiry checks; default test isolation remains explicit.
+- [x] Update README setup, conda autoweb commands, profile authoring, standalone scripts, and test examples.
 
 Acceptance: one documented test command runs deterministic coverage without Gmail or Gemini access, and live tests require explicit selection. Successful login is reusable as a fixture for future tests.
+
+Implementation: an explicitly loaded autoweb.pytest_plugin provides function-scoped configuration, settings/profile, isolated browser, fake/Gmail provider, and authenticated-login fixtures. Repeated profile options or indirect parametrization select sites. One browser fixture owns cleanup through login and protected test actions; provider initialization precedes browser startup. Live-marked tests skip by default, external profiles and Gmail selection require explicit live enablement, and controlled fixture sessions block external browser requests. Production login remains independent of pytest. JSON reports expose concise outcomes without credential values or request data; standalone login accepts --report. Failure screenshots mask configured inputs. Raw Playwright traces are opt-in, with failure-only retention available and sensitive-data limits documented. Manual session-state reuse requires fresh authentication checks. See docs/TESTING.md.
+
+Verification: all 272 deterministic tests passed and one live test skipped in conda autoweb on Linux (Python 3.12.15, Playwright 1.40.0, pytest 7.4.3, pytest-asyncio 0.21.1). The suite exercises all three login modes through the public fixtures, protected actions, downstream profile parametrization, standalone success/failure reports, live/provider gates, real failure screenshots/traces, successful trace disposal, and cleanup after login/test failures. Sandbox socket restrictions required running Chromium/loopback tests outside the sandbox. pip check reported no broken requirements; runner help and runtime imports without pytest were verified. No live websites, Gmail, OAuth consent, or Gemini calls were made during Phase VI.
 
 ## Phase 7: Optional AI fallback and later login variants
 
@@ -194,6 +198,6 @@ Implement phases 1-3 first to establish one complete password-login path. Implem
 
 Initial execution is sequential and Chromium-based, matching the current project. Broader browser matrices, shared-mailbox parallel runs, signup, social/enterprise SSO, SMS/TOTP/device approvals, CAPTCHA, passkeys, and unrelated website actions are later work. Unsupported challenges should produce a clear outcome rather than false success.
 
-The first live website/test account has not been selected. Local controlled fixtures and fake verification data allow implementation and testing to progress independently; live validation depends on that profile and account.
+Phase V exercised configured practice websites and a user-authorized test mailbox. Local controlled fixtures and fake verification data keep default coverage deterministic; future live validation requires an explicitly selected profile and test account.
 
 Definition of done for the first release: clean module boundaries; all three initial login modes verified on controlled fixtures; an authenticated session usable by later tests; explicit errors and deadlines; optional Gmail/AI dependencies; non-secret configuration examples; documented autoweb setup; trial-codes ignored.

@@ -3,9 +3,6 @@
 import asyncio
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
-import json
-from pathlib import Path
-from threading import Thread
 from time import monotonic
 
 import pytest
@@ -15,50 +12,9 @@ from autoweb.contracts import VerificationError, VerificationResult
 from autoweb.gmail import GmailVerificationProvider
 from autoweb.login import LoginError, authenticated_session, run_login
 from autoweb.browser import open_session
-from tests.fixtures.email_site import DEMO_CODE, DEMO_EMAIL, EmailSite, message
+from tests.fixtures.email_site import DEMO_CODE, message
 
-REPO = Path(__file__).resolve().parents[2]
 pytestmark = pytest.mark.asyncio
-
-
-@pytest.fixture
-def email_site():
-    server = EmailSite()
-    thread = Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        yield server
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=5)
-
-
-@pytest.fixture
-def email_configuration(tmp_path, email_site):
-    def build(mode="email_otp", *, scenario="normal", split=False, timeout=2):
-        filename = "email-otp.example.json" if mode == "email_otp" else "password-email-otp.example.json"
-        profile = json.loads((REPO / "configs/sites" / filename).read_text())
-        route = "email-login" if mode == "email_otp" else "password-email-login"
-        profile["entry_url"] = f"http://127.0.0.1:{email_site.server_port}/{route}?scenario={scenario}&split={str(split).lower()}"
-        profile["success"][1] = {"type": "api", "url": "/api/session", "expected_json": {"authenticated": True}}
-        profile["verification"].update(sender="noreply@example.test", timeout_seconds=timeout,
-            rejected=[{"type": "element", "target": {"by": "test_id", "value": "otp-error"}}],
-            expired=[{"type": "element", "target": {"by": "test_id", "value": "otp-expired"}}])
-        request = next(step for step in profile["steps"] if step["action"] == "request_otp")
-        request["target"] = {"by": "role", "value": "button", "name": "Send code"}
-        if split:
-            next(step for step in profile["steps"] if step["action"] == "fill_otp")["targets"] = [
-                {"by": "label", "value": f"Digit {i + 1}"} for i in range(6)]
-        settings = json.loads((REPO / "configs/settings.json").read_text())
-        settings["timeouts"].update(login_seconds=5, verification_seconds=timeout, action_ms=700)
-        settings["gmail"]["poll_interval_seconds"] = 0.01
-        (tmp_path / "settings.json").write_text(json.dumps(settings))
-        (tmp_path / "site.json").write_text(json.dumps(profile))
-        return load_configuration("site.json", "settings.json", project_root=tmp_path, environ={
-            "EXAMPLE_EMAIL": DEMO_EMAIL, "EXAMPLE_USERNAME": "test-user", "EXAMPLE_PASSWORD": "test-password",
-        })
-    return build
 
 
 class FakeProvider:

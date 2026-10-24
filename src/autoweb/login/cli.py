@@ -2,18 +2,27 @@
 
 import argparse
 import asyncio
+from pathlib import Path
 
 from autoweb.browser import BrowserError
 from autoweb.config import ConfigurationError, load_configuration
 from autoweb.contracts import VerificationError
+from autoweb.reporting.json_report import write_login_report
 
 from .errors import LoginError
 from .flow import authenticated_session
 
 
-async def _run(configuration) -> None:
-    async with authenticated_session(configuration) as result:
-        print(f"Login succeeded: {result.site}; completed {len(result.steps)} steps")
+async def _run(configuration, report: Path | None = None) -> None:
+    try:
+        async with authenticated_session(configuration) as result:
+            if report is not None:
+                write_login_report(result, report)
+            print(f"Login succeeded: {result.site}; completed {len(result.steps)} steps")
+    except LoginError as error:
+        if report is not None:
+            write_login_report(error.result, report)
+        raise
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -22,6 +31,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--settings", default="configs/settings.json")
     parser.add_argument("--project-root")
     parser.add_argument("--env-file")
+    parser.add_argument("--report", type=Path, help="Write a secret-free JSON login result")
     parser.add_argument("--headed", action="store_true", help="Show the browser during login")
     parser.add_argument(
         "--slowmo", nargs="?", const=700, type=int, metavar="MS",
@@ -38,11 +48,13 @@ def main(argv: list[str] | None = None) -> int:
             configuration.settings.browser.headless = False
         if args.slowmo is not None:
             configuration.settings.browser.slow_mo_ms = args.slowmo
-        asyncio.run(_run(configuration))
+        asyncio.run(_run(configuration, args.report))
     except ConfigurationError as error:
         parser.exit(2, f"Configuration error: {error}\n")
     except (LoginError, BrowserError, VerificationError) as error:
         parser.exit(1, f"{error}\n")
+    except OSError:
+        parser.exit(1, "Cannot write login report\n")
     except KeyboardInterrupt:
         parser.exit(130, "Login interrupted\n")
     return 0

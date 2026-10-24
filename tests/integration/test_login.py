@@ -6,7 +6,6 @@ import os
 import subprocess
 import sys
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 import pytest
 
@@ -16,31 +15,7 @@ from autoweb.config.models import Locator
 from autoweb.login import LoginError, authenticated_session, run_login
 from tests.fixtures.login_site import DEMO_PASSWORD, DEMO_USERNAME
 
-REPO = Path(__file__).resolve().parents[2]
 pytestmark = pytest.mark.asyncio
-
-
-@pytest.fixture
-def configuration_factory(tmp_path, login_site):
-    def build(filename="local-password.example.json", *, username=DEMO_USERNAME,
-              password=DEMO_PASSWORD, change=None, login_seconds=3):
-        profile = json.loads((REPO / "configs/sites" / filename).read_text())
-        route = "/login-two-step" if "two-step" in filename else "/login"
-        profile["entry_url"] = f"http://127.0.0.1:{login_site.server_port}{route}"
-        if change:
-            change(profile)
-        settings = json.loads((REPO / "configs/settings.json").read_text())
-        settings["timeouts"].update(action_ms=500, navigation_ms=5000,
-                                    login_seconds=login_seconds, verification_seconds=0.1)
-        settings["artifacts_dir"] = "artifacts"
-        (tmp_path / "configs").mkdir(exist_ok=True)
-        (tmp_path / "configs/settings.json").write_text(json.dumps(settings))
-        (tmp_path / "site.json").write_text(json.dumps(profile))
-        configuration = load_configuration("site.json", project_root=tmp_path, environ={
-            "LOCAL_LOGIN_USERNAME": username, "LOCAL_LOGIN_PASSWORD": password,
-        })
-        return configuration
-    return build
 
 
 @pytest.fixture
@@ -216,13 +191,17 @@ async def test_cli_reports_success_or_failure_without_secrets(configuration_fact
     configuration = configuration_factory(password=password)
     environment = dict(os.environ, LOCAL_LOGIN_USERNAME=DEMO_USERNAME,
                        LOCAL_LOGIN_PASSWORD=password, AUTOWEB_HEADLESS="true", AUTOWEB_AI_ENABLED="false")
+    report = configuration.project_root / "login-result.json"
     result = await asyncio.to_thread(subprocess.run, [
         sys.executable, "-m", "autoweb.login", "--site", "site.json",
         "--project-root", str(configuration.project_root),
+        "--report", str(report),
     ], capture_output=True, text=True, timeout=60, env=environment,
        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     assert result.returncode == exit_code, result.stderr
     assert password not in result.stdout + result.stderr
+    assert password not in report.read_text()
+    assert json.loads(report.read_text())["status"] == ("succeeded" if exit_code == 0 else "failed")
     if exit_code == 0:
         assert "Login succeeded" in result.stdout
     else:

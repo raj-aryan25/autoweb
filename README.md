@@ -1,6 +1,6 @@
 # AutoWeb
 
-A Python framework for reusable Playwright login tests, with an independent Gmail verification module. Phases I-V provide validated configuration, async browser primitives, password login, and email OTP or password-plus-email-OTP login in a reusable browser session. See [Phase V setup](docs/EMAIL_LOGIN_SETUP.md) for the public practice-site password test, environment files, and subsequent opt-in OAuth/email setup. Work follows [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+A Python framework for reusable Playwright login tests, with an independent Gmail verification module. Phases I-VI provide validated configuration, async browser primitives, password login, and email OTP or password-plus-email-OTP login in a reusable browser session. See [Phase V setup](docs/EMAIL_LOGIN_SETUP.md) for the public practice-site password test, environment files, and subsequent opt-in OAuth/email setup. Work follows [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
 
 ## Environment and installation
 
@@ -16,7 +16,7 @@ Gmail and Gemini dependencies are optional for the new package:
 conda run -n autoweb python -m pip install -e ".[gmail,ai,test]"
 ~~~
 
-Dependencies are declared in pyproject.toml. Versions reflect the installed autoweb baseline verified during Phase I (Python 3.10.18), rather than an SDK upgrade. Install the matching Chromium binary for browser integration tests:
+Dependencies are declared in pyproject.toml. Phase VI was verified on Linux with Python 3.12.15 and the same pinned dependencies. Versions reflect the installed autoweb baseline verified during Phase I (Python 3.10.18), rather than an SDK upgrade. Install the matching Chromium binary for browser integration tests:
 
 ~~~powershell
 conda run -n autoweb python -m playwright install chromium
@@ -31,16 +31,19 @@ conda run -n autoweb python -m playwright install chromium
 | src/autoweb/gmail/ | Explicit OAuth setup, Gmail API boundary, MIME decoding, fresh verification polling |
 | src/autoweb/login/ | Password-login orchestration, authentication checks, and session handoff |
 | src/autoweb/ai/ | Optional Gemini verification extraction; broader discovery remains future work |
-| src/autoweb/reporting/ | Future step results and failure diagnostics |
+| src/autoweb/reporting/ | Concise JSON step/login reports |
+| src/autoweb/pytest_plugin.py | Opt-in async pytest fixtures, live selection, and diagnostics |
+| src/autoweb/testing/ | In-memory verification provider for controlled tests |
 | configs/settings.json | Non-secret browser, timeout, mailbox-path, and AI defaults |
 | configs/sites/ | Non-secret example site profiles |
 | tests/unit/ | Configuration and browser failure-path tests |
 | tests/integration/ | Real headless Chromium checks against controlled local pages |
+| tests/e2e/ | Explicitly selected live-profile login tests |
 | tests/fixtures/ | Controlled DOM/frame pages and a cookie-authenticated login demo |
 | scripts/ | Thin password-login and independent Gmail diagnostic entry points |
-| artifacts/ | Ignored runtime output; created by future execution code as needed |
+| artifacts/ | Ignored screenshots, JSON reports, optional sensitive traces and session state |
 
-The login package executes password and email OTP flows and returns an active authenticated session; see its [usage and local demo](src/autoweb/login/README.md). The browser package implements reusable primitives; see its [API and ownership documentation](src/autoweb/browser/README.md). Gmail can retrieve fresh codes independently; see its [setup, diagnostics, and provider contract](src/autoweb/gmail/README.md). Broader reporting and AI discovery remain future work. Importing the package does not open a browser, authenticate with Gmail, load a dotenv file, or create an AI client. Configuration loading is explicit.
+The login package executes password and email OTP flows and returns an active authenticated session; see its [usage and local demo](src/autoweb/login/README.md). The browser package implements reusable primitives; see its [API and ownership documentation](src/autoweb/browser/README.md). Gmail can retrieve fresh codes independently; see its [setup, diagnostics, and provider contract](src/autoweb/gmail/README.md). The [pytest interface](docs/TESTING.md) provides reusable authenticated-session fixtures and diagnostics. Broader AI discovery remains future work. Importing the package does not open a browser, authenticate with Gmail, load a dotenv file, or create an AI client. Configuration loading is explicit.
 
 ## Check configuration
 
@@ -79,10 +82,10 @@ For a step-by-step visible password demo and live Gmail checks, use the [manual 
 conda run -n autoweb python -m pytest -q
 ~~~
 
-Tests cover profile validation, credential resolution, secret-safe output, paths, import isolation, browser lifecycle, scoped locators, nested iframes, open Shadow DOM, password/OTP filling, complete password login, authenticated-session reuse, explicit failures, and state waits. Gmail tests cover saved synthetic MIME messages, fresh-code correlation, pagination, deadlines, API/auth errors, explicit acknowledgment, and optional AI validation. Browser integration tests use a loopback HTTP server and headless Chromium. Tests do not use live websites or Gmail/Gemini access.
+Tests cover profile validation, credential resolution, secret-safe output, paths, import isolation, browser lifecycle, scoped locators, nested iframes, open Shadow DOM, password/OTP filling, complete password login, authenticated-session reuse, explicit failures, and state waits. Gmail tests cover saved synthetic MIME messages, fresh-code correlation, pagination, deadlines, API/auth errors, explicit acknowledgment, and optional AI validation. Browser integration tests use a loopback HTTP server and headless Chromium. The default command skips live tests and does not use live websites or Gmail/Gemini access. See [testing and diagnostics](docs/TESTING.md) for fixture usage, repeated profile selection, explicit live commands, sensitive trace handling, and optional session-state reuse.
 
 ## Project history
 
-AutoWeb is a standalone repository containing the modular framework implemented through Phase V. Legacy sources remain in D:/RAJ ARYAN/Codec/scaile-tech/scaile-backlink: gmail-auto/ provided reference code for Phase IV, and shadowdom-auto/ contains the earlier browser automation. They are not runtime dependencies of AutoWeb. Historical trial-codes/ experiments are excluded.
+AutoWeb is a standalone repository containing the modular framework implemented through Phase VI. Legacy sources remain in D:/RAJ ARYAN/Codec/scaile-tech/scaile-backlink: gmail-auto/ provided reference code for Phase IV, and shadowdom-auto/ contains the earlier browser automation. They are not runtime dependencies of AutoWeb. Historical trial-codes/ experiments are excluded.
 
 Future work follows IMPLEMENTATION_PLAN.md. Deterministic email login tests require no live mailbox. An opt-in live Gmail OTP smoke test passed against Expand Testing after explicit OAuth authorization, including protected-session reuse and logout. See [setup and the runnable OTP profile](docs/EMAIL_LOGIN_SETUP.md). Live Gemini validation has not been performed.
