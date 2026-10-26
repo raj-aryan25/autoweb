@@ -20,7 +20,8 @@ gmail = [
     "google-auth-httplib2==0.2.0",
     "google-auth-oauthlib==1.2.2",
 ]
-ai = ["google-generativeai==0.8.5"]
+# Gemini uses REST; retain the extra for existing install commands.
+ai = []
 test = ["pytest==7.4.3", "pytest-asyncio==0.21.1"]
 
 [project.scripts]

@@ -57,7 +57,7 @@ The baseline is captured before `request_otp`; a timezone-aware timestamp is tak
 
 ## Diagnostics and command line
 
-Failures attempt a bounded screenshot under artifacts/login-failures/. Configured identifier/password/OTP inputs and password-type inputs are masked. Screenshot failures do not replace the original login error. Filled values, cookie tokens, response bodies, and raw Playwright DOM dumps are excluded from result/error messages. Broader trace/reporting support belongs to Phase VI.
+Failures attempt a bounded screenshot under artifacts/login-failures/. Configured identifier/password/OTP targets, all editable controls, and frames are masked. Screenshot failures do not replace the original login error. Filled values, cookie tokens, response bodies, and raw Playwright DOM dumps are excluded from result/error messages. See [testing and diagnostics](../../../docs/TESTING.md) for JSON reports and opt-in sensitive traces. [Phase VII Part 1](../../../docs/PHASE7.md) adds constrained AI assistance and same-context magic-link login; live Part 2 validation is pending.
 
 The CLI validates one selected site profile, runs its login flow, reports success/failure, and closes the session. Use the Python context manager for post-login work:
 

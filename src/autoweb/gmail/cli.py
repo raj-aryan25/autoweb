@@ -29,10 +29,11 @@ async def diagnose(settings, site, recipient: str, api_key: str | None,
     if settings.gmail.poll_interval_seconds >= timeout:
         raise ConfigurationError("Gmail polling interval must be shorter than the verification timeout")
     fallback = None
-    if settings.ai.enabled:
+    if settings.ai.enabled and verification.kind == "otp":
         if not api_key:
             raise ConfigurationError("Enabled Gemini extraction requires its API key")
-        fallback = GeminiCodeExtractor(settings.ai.model, SecretStr(api_key))
+        fallback = GeminiCodeExtractor(settings.ai.model, SecretStr(api_key),
+                                       request_timeout_seconds=settings.ai.request_timeout_seconds)
     try:
         credentials = await asyncio.wait_for(asyncio.to_thread(load_credentials, settings.gmail),
                                              settings.gmail.request_timeout_seconds)
@@ -53,11 +54,13 @@ async def diagnose(settings, site, recipient: str, api_key: str | None,
             challenge_started_at=started, deadline=monotonic() + timeout, baseline_ids=baseline,
             subject=verification.subject, code_regex=verification.code_regex,
             code_length=verification.code_length, code_characters=verification.code_characters,
+            kind=verification.kind, allowed_origins=tuple(verification.allowed_origins),
+            link_path_prefix=verification.link_path_prefix,
         )
         result = await provider.receive(request)
         print(f"Verification found; method={result.extraction_method}; received={result.received_at.isoformat()}")
         if show_code:
-            print(f"Code: {result.value}")
+            print(f"Verification value: {result.value}" if verification.kind == "magic_link" else f"Code: {result.value}")
         # Retrieval alone cannot prove consumption. This diagnostic never acknowledges email.
 
 

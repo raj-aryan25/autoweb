@@ -28,7 +28,7 @@ async def capture_failure(
         masks.extend(resolve_locator(page, target, include_hidden=True)
                      for step in profile.steps if isinstance(step, FillOTPStep)
                      for target in step.targets)
-        masks.append(page.locator('input[type="password"]'))
+        masks.append(page.locator('input, textarea, [contenteditable], iframe, frame'))
         await page.screenshot(path=str(destination), mask=masks, timeout=timeout_ms)
     except (Error, OSError):
         return ()

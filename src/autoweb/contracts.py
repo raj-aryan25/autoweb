@@ -6,6 +6,8 @@ from typing import Literal, Protocol
 import math
 import re
 
+from autoweb.links import valid_origin
+
 
 class VerificationError(Exception):
     """Provider-neutral failure carrying a static, secret-safe reason."""
@@ -38,8 +40,18 @@ class VerificationRequest:
     code_regex: str = r"\b\d{6}\b"
     code_length: int = 6
     code_characters: str = r"[0-9]"
+    kind: Literal["otp", "magic_link"] = "otp"
+    allowed_origins: tuple[str, ...] = ()
+    link_path_prefix: str | None = None
 
     def __post_init__(self) -> None:
+        if self.kind not in {"otp", "magic_link"}:
+            raise ValueError("Unknown verification kind")
+        if self.kind == "magic_link" and (
+            not self.allowed_origins or not all(valid_origin(value) for value in self.allowed_origins)
+            or not isinstance(self.link_path_prefix, str) or not self.link_path_prefix.startswith("/")
+        ):
+            raise ValueError("Magic-link requests require an exact origin and path policy")
         if not all(isinstance(value, str) and value.strip()
                    for value in (self.site, self.account, self.sender, self.recipient)):
             raise ValueError("Verification identity and filters must be nonempty")
@@ -84,7 +96,7 @@ class VerificationResult:
     value: str = field(repr=False)
     message_id: str
     received_at: datetime
-    extraction_method: Literal["regex", "gemini"]
+    extraction_method: Literal["regex", "gemini", "link"]
     site: str
     account: str = field(repr=False)
 

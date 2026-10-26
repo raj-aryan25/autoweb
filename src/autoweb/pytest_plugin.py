@@ -109,8 +109,17 @@ def autoweb_fake_provider():
     return FakeVerificationProvider()
 
 
+@pytest.fixture
+def autoweb_ai_client(autoweb_configuration):
+    if not autoweb_configuration.settings.ai.enabled:
+        return None
+    from autoweb.ai.client import client_from_configuration
+
+    return client_from_configuration(autoweb_configuration)
+
+
 @pytest_asyncio.fixture
-async def autoweb_verification_provider(request, autoweb_configuration, autoweb_fake_provider):
+async def autoweb_verification_provider(request, autoweb_configuration, autoweb_fake_provider, autoweb_ai_client):
     validate_login(autoweb_configuration)
     if not autoweb_configuration.site.verification:
         yield None
@@ -119,7 +128,7 @@ async def autoweb_verification_provider(request, autoweb_configuration, autoweb_
     else:
         from autoweb.gmail.provider import open_gmail_provider
 
-        async with open_gmail_provider(autoweb_configuration) as provider:
+        async with open_gmail_provider(autoweb_configuration, ai_client=autoweb_ai_client) as provider:
             yield provider
 
 
@@ -174,10 +183,11 @@ async def autoweb_session(request, autoweb_configuration, autoweb_verification_p
 
 
 @pytest_asyncio.fixture
-async def autoweb_login(request, autoweb_session, autoweb_configuration, autoweb_verification_provider):
+async def autoweb_login(request, autoweb_session, autoweb_configuration, autoweb_verification_provider, autoweb_ai_client):
     """Return a successful LoginResult with a session available until test teardown."""
     try:
-        result = await run_login(autoweb_session, autoweb_configuration, autoweb_verification_provider)
+        result = await run_login(autoweb_session, autoweb_configuration, autoweb_verification_provider,
+                                 ai_client=autoweb_ai_client)
     except LoginError as error:
         _report(request, error.result)
         raise

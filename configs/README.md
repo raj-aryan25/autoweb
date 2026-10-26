@@ -24,12 +24,15 @@ Environment variables override these settings:
 | AUTOWEB_GMAIL_REQUEST_TIMEOUT_SECONDS | gmail.request_timeout_seconds |
 | AUTOWEB_AI_ENABLED | ai.enabled; true or false |
 | AUTOWEB_AI_MODEL | ai.model |
+| AUTOWEB_AI_LOCATOR_FALLBACK | ai.locator_fallback; opt-in control discovery |
+| AUTOWEB_AI_SCREENSHOTS | ai.screenshots; opt-in masked external PNG analysis |
+| AUTOWEB_AI_REQUEST_TIMEOUT_SECONDS | ai.request_timeout_seconds |
 | AUTOWEB_ARTIFACTS_DIR | artifacts_dir |
 | AUTOWEB_ROOT | Configuration project root |
 
 ## Site profiles
 
-Each file defines schema_version (1), name, entry_url, login_mode, credentials, steps, success, and optional failure and verification fields. The supplied profiles demonstrate password, email_otp, and password_email_otp modes.
+Each file defines schema_version (1), name, entry_url, login_mode, credentials, steps, success, and optional failure and verification fields. The supplied profiles demonstrate password, email_otp, password_email_otp, and email_magic_link modes.
 
 Credential entries use objects such as {"env": "EXAMPLE_PASSWORD"}; plaintext passwords are not accepted. Each fill step declares which credential it uses. Preflight checks all declared references, the verification recipient, and the enabled AI key for nonempty values. Process variables override dotenv entries.
 
@@ -42,6 +45,8 @@ Steps retain their individual parameters:
 | wait_for | target locator and state (visible, hidden, attached, detached) |
 | request_otp | target locator for the click that requests verification |
 | fill_otp | targets: one locator, or one locator per code character |
+| request_magic_link | target locator for the one sign-in-link request click |
+| follow_magic_link | consume the fresh allowed link in the same browser page |
 
 Every step can set optional and timeout_ms. Required credential entry, OTP request/fill, and submission cannot be replaced by optional steps. Email flows require one request_otp followed by one fill_otp and a submit; the request action can also submit the password form in a password-plus-OTP flow.
 
@@ -54,6 +59,13 @@ Email verification defines sender, optional subject, recipient (an environment r
 Optional verification.rejected and verification.expired lists use the same assertion schema and identify incorrect/expired-code states. They produce verification_rejected and verification_expired; general profile.failure checks continue to report credentials_rejected. Rejection wins over success. Absolute API assertions in all these lists must use the login origin. Automatic resend/retry count is zero. See [setup and execution](../docs/EMAIL_LOGIN_SETUP.md) for exact files and commands.
 
 ## Local files
+
+Phase VII adds `email_magic_link` mode with `verification.kind=magic_link`, explicit
+`allowed_origins`, and `link_path_prefix`. Use one required link request followed by one
+required follow step; do not mix OTP steps into this mode. Existing profiles default to
+`verification.kind=otp`. Steps may opt in to `ai_fallback` and supply a non-secret `ai_hint`.
+Runtime AI and locator fallback must also be enabled. See [Phase VII configuration and
+limits](../docs/PHASE7.md), including the local/live validation split.
 
 Copy an example to a site profile for your target and adapt its locators, assertions, and email filters. Use configs/sites/*.local.json for ignored account-specific profiles. Alternative settings can be supplied with --settings; configs/settings.local.json is ignored. Paths in all configuration files are relative to the selected project root, not to the JSON file's directory.
 

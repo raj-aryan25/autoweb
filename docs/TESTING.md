@@ -50,6 +50,7 @@ without pytest; installing only the runtime dependencies does not load pytest.
 | `autoweb_settings` | Runtime settings from that configuration |
 | `autoweb_site_profile` | Validated site profile |
 | `autoweb_fake_provider` | Fresh in-memory provider; `enqueue("001234")` adds a synthetic code |
+| `autoweb_ai_client` | Optional shared Gemini client; override with an injected fake for controlled AI tests |
 | `autoweb_verification_provider` | Fake by default; `None` for password login; explicitly selected Gmail otherwise |
 | `autoweb_session` | Isolated browser/context/page; owns cleanup, requires provider startup first |
 | `autoweb_login` | Successful `LoginResult`; its `.session` stays open through the test |

@@ -11,7 +11,7 @@ from .poller import GmailVerificationProvider, build_query
 
 
 @asynccontextmanager
-async def open_gmail_provider(configuration: Configuration):
+async def open_gmail_provider(configuration: Configuration, *, ai_client=None):
     """Initialize OAuth before website actions; never initiate interactive consent."""
     settings = configuration.settings
     verification = configuration.site.verification
@@ -21,13 +21,16 @@ async def open_gmail_provider(configuration: Configuration):
     except ValueError:
         raise ConfigurationError("Invalid Gmail sender, recipient, or subject filter") from None
     fallback = None
-    if settings.ai.enabled:
+    if settings.ai.enabled and verification.kind == "otp":
         from autoweb.ai.extraction import GeminiCodeExtractor
 
         api_key = configuration.secrets.get("ai:api_key")
         if api_key is None:
             raise ConfigurationError("Enabled Gemini extraction requires its API key")
-        fallback = GeminiCodeExtractor(settings.ai.model, api_key)
+        from autoweb.ai.client import client_from_configuration
+
+        fallback = GeminiCodeExtractor(client=ai_client or client_from_configuration(configuration),
+                                       request_timeout_seconds=settings.ai.request_timeout_seconds)
     try:
         credentials = await asyncio.wait_for(
             asyncio.to_thread(load_credentials, settings.gmail), settings.gmail.request_timeout_seconds,

@@ -1,6 +1,6 @@
 # AutoWeb implementation plan
 
-Status: Phases I-VI implemented and verified at the user's request. Both the public password-demo smoke test and Expand Testing live Gmail OTP login passed during Phase V. The user completed Gmail OAuth consent explicitly. Phase VII remains pending.
+Status: Phases I-VI implemented and verified at the user's request. Both the public password-demo smoke test and Expand Testing live Gmail OTP login passed during Phase V. The user completed Gmail OAuth consent explicitly. Phase VII Part 1 (implementation and controlled local verification) is complete. Part 2 was explicitly resumed on 2026-10-26 but remains incomplete: selected-model API generation returned HTTP 503, and approved public magic-link demos failed before authentication. See docs/PHASE7_LIVE_VALIDATION.md.
 
 Phase I verification: editable installation in conda autoweb (Python 3.10.18); 49 configuration tests passed; schema-validation CLI passed; pip check reported no broken requirements. The installation repaired a pre-existing missing pytest dependency (exceptiongroup 1.3.1). Browser execution and live Gmail/Gemini validation remain in later phases.
 
@@ -182,15 +182,32 @@ Verification: all 272 deterministic tests passed and one live test skipped in co
 
 ## Phase 7: Optional AI fallback and later login variants
 
-- [ ] Consolidate Gemini behind an injected, lazily initialized client; verify supported SDK/model choices during implementation.
-- [ ] Replace eval with validated structured parsing; handle ambiguous or invalid suggestions without guessing a control.
-- [ ] Make field prompts describe the actual target, including passwords and OTPs; recheck suggested locators against current page state.
-- [ ] Mask sensitive inputs before external screenshot analysis and redact results/artifacts as appropriate.
-- [ ] Keep configured login tests working with AI disabled or unavailable.
-- [ ] Add magic-link login after OTP behavior is stable, preserving the browser session and validating configured destination domains.
-- [ ] Add site adapters for genuinely different flows as demonstrated needs arise.
+### Part 1: Implementation and controlled local verification (complete)
+
+- [x] Consolidate Gemini behind an injected, lazily initialized client; verify supported SDK/model choices during implementation.
+- [x] Replace eval with validated structured parsing; handle ambiguous or invalid suggestions without guessing a control.
+- [x] Make field prompts describe the actual target, including passwords and OTPs; recheck suggested locators against current page state.
+- [x] Mask sensitive inputs before external screenshot analysis and redact results/artifacts as appropriate.
+- [x] Keep configured login tests working with AI disabled or unavailable.
+- [x] Add magic-link login after OTP behavior is stable, preserving the browser session and validating configured destination domains.
+- [ ] Add site adapters for genuinely different flows as demonstrated needs arise (conditional; none needed for local fixtures, reassess with the Part 2 site).
 
 Acceptance: enabling AI can assist discovery without changing success criteria; disabling it does not break configured flows.
+
+Implementation: one lazy, injected Gemini REST client serves validated code extraction and constrained locator assistance. The unused deprecated SDK dependency was removed; existing ai-extra install commands remain valid. Official library, model and structured-output references were reviewed; real account/model availability remains a Part 2 check. Configured controls take precedence; absent required controls can opt in to existing-candidate selection inside configured frame/form scope. Password/OTP tasks are distinct, candidate state is rechecked, known secrets are redacted, and optional images mask editable controls, frames and known secret text before capture. No model output is evaluated or allowed to decide authentication. Existing assertions and non-idempotent action policy remain authoritative.
+
+Magic-link profiles require exact allowed origins and an initial path prefix. Fresh matching mail supplies one unambiguous plain/HTML link; injected provider results are revalidated. Consumption preserves the requesting page/context, challenge cookies, and authentication cookies, while guarding main-frame HTTP/script navigation and bounding redirect hops. Mail acknowledgment follows actual authentication. No production site adapter was demonstrated as necessary. See docs/PHASE7.md for configuration, privacy limits and GET-based redirect handling.
+
+Verification: the full deterministic suite passed 333 tests with one live test skipped in conda autoweb (Python 3.12.15, Playwright 1.40.0, pytest 7.4.3, pytest-asyncio 0.21.1). Controlled tests cover AI outage with stable controls, password/OTP fallback prompts, malformed/ambiguous output, changed controls, masked screenshots, transport deadlines/cancellation, magic-link freshness and policy, injected-provider validation, one-use cookie-bound consumption, public pytest fixture integration, protected actions, expiry, missing mail, disallowed HTTP/script redirects, and loops. The editable installation was refreshed locally without dependency downloads, pip check passed, the magic-link example passed schema validation, and runtime imports loaded no browser/Google SDK/pytest clients. No live Gemini/Gmail requests, site logins, or OAuth consent were performed.
+
+### Part 2: Live validation (resumed; incomplete)
+
+- [x] Wait for the user to configure Gemini in the ignored .env and explicitly notify the agent to continue.
+- [ ] Check the explicitly selected model/key, API response compatibility and availability with a deliberate live call; do not print secrets.
+- [ ] Select/configure a test website/account and approved mailbox filters/link origins; validate login, authenticated-session reuse, and applicable logout/expiry behavior.
+- [ ] Add a focused site adapter only if that demonstrated flow cannot be expressed by a profile.
+
+The user resumed Part 2, selected gemini-3.8-flash, and approved Better Auth and Stytch demos with the existing test mailbox. Initial model discovery worked, but selected-model generation timed out and later returned HTTP 503 after key verification; a user-approved 2.5 Flash diagnostic returned HTTP 404. Better Auth exposed missing CSRF/session routes, and Stytch rejected one email request with HTTP 401. Neither produced a verified login; no automatic resends or mail acknowledgment occurred. The user then explicitly approved the existing Expand Testing OTP profile with the same mailbox for login, protected-session reuse and logout validation. That standard live pytest check passed (1 test in 20.04 seconds), proving fresh Gmail OTP retrieval, authentication, same-context protected-page reuse and logout revocation with zero Gemini calls while AI was enabled; acknowledgment remained never and tracing was off. Live OTP validation is complete, but it does not complete the pending Gemini and magic-link validation. Secret-safe AI status diagnostics, explicitly gated synthetic live tests, and an Expand Testing regex regression were added. The default regression run passed 339 tests with four live checks skipped; 50 focused Phase VII checks passed after the final diagnostic/profile checks. See docs/PHASE7_LIVE_VALIDATION.md. A working magic-link target and successful selected-model generation are still required. New website tests require the user's confirmation.
 
 ## Delivery order and scope limits
 

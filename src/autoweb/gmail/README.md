@@ -136,8 +136,9 @@ without being reused. Own the client with `async with` or call `aclose()`.
 
 AI remains disabled by default. The purpose-specific `GeminiCodeExtractor` uses
 the documented Gemini REST endpoint with a configured model and API key, without
-global SDK configuration or a fixed model default. Broader AI discovery and SDK
-consolidation remain Phase VII work; this adapter does not need the legacy `ai` extra.
+global SDK configuration or a fixed model default. Phase VII Part 1 consolidates this
+adapter and locator assistance behind the injected shared REST client; no SDK is required.
+The legacy dependency was removed. See [Phase VII setup and limits](../../../docs/PHASE7.md).
 
 The standalone diagnostic injects it only when `ai.enabled` is true. Set
 `AUTOWEB_AI_MODEL` and the key referenced by `ai.api_key` before enabling it.

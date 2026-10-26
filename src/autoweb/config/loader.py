@@ -98,6 +98,9 @@ _OVERRIDES = {
     "AUTOWEB_GMAIL_REQUEST_TIMEOUT_SECONDS": ("gmail", "request_timeout_seconds", "float"),
     "AUTOWEB_AI_ENABLED": ("ai", "enabled", "bool"),
     "AUTOWEB_AI_MODEL": ("ai", "model", "str"),
+    "AUTOWEB_AI_LOCATOR_FALLBACK": ("ai", "locator_fallback", "bool"),
+    "AUTOWEB_AI_SCREENSHOTS": ("ai", "screenshots", "bool"),
+    "AUTOWEB_AI_REQUEST_TIMEOUT_SECONDS": ("ai", "request_timeout_seconds", "float"),
 }
 
 

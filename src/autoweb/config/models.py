@@ -12,6 +12,8 @@ from pydantic import (
     BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator,
 )
 
+from autoweb.links import valid_origin
+
 NonEmpty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 PositiveInt = Annotated[int, Field(strict=True, gt=0)]
 PositiveNumber = Annotated[float, Field(strict=True, gt=0, allow_inf_nan=False)]
@@ -80,6 +82,9 @@ class GmailSettings(Model):
 class AISettings(Model):
     enabled: bool = Field(default=False, strict=True)
     model: NonEmpty | None = None
+    locator_fallback: bool = Field(default=False, strict=True)
+    screenshots: bool = Field(default=False, strict=True)
+    request_timeout_seconds: PositiveNumber = 10
     api_key: EnvironmentReference = Field(
         default_factory=lambda: EnvironmentReference(env="GOOGLE_API_KEY")
     )
@@ -88,6 +93,8 @@ class AISettings(Model):
     def check_enabled_model(self) -> AISettings:
         if self.enabled and self.model is None:
             raise ValueError("AI requires an explicit model when enabled")
+        if self.model is not None and not re.fullmatch(r"(?:models/)?[A-Za-z0-9._-]+", self.model):
+            raise ValueError("AI model must be an explicit model identifier")
         return self
 
 
@@ -117,6 +124,8 @@ class Locator(Model):
 class Step(Model):
     optional: bool = Field(default=False, strict=True)
     timeout_ms: PositiveInt | None = None
+    ai_fallback: bool = Field(default=False, strict=True)
+    ai_hint: NonEmpty | None = None
 
 
 class ClickStep(Step):
@@ -146,8 +155,18 @@ class FillOTPStep(Step):
     targets: list[Locator] = Field(min_length=1)
 
 
+class RequestMagicLinkStep(Step):
+    action: Literal["request_magic_link"]
+    target: Locator
+
+
+class FollowMagicLinkStep(Step):
+    action: Literal["follow_magic_link"]
+
+
 LoginStep = Annotated[
-    Union[ClickStep, FillStep, WaitStep, RequestOTPStep, FillOTPStep],
+    Union[ClickStep, FillStep, WaitStep, RequestOTPStep, FillOTPStep,
+          RequestMagicLinkStep, FollowMagicLinkStep],
     Field(discriminator="action"),
 ]
 
@@ -197,6 +216,7 @@ Assertion = Annotated[
 
 
 class VerificationSettings(Model):
+    kind: Literal["otp", "magic_link"] = "otp"
     sender: NonEmpty
     subject: NonEmpty | None = None
     recipient: EnvironmentReference
@@ -207,6 +227,23 @@ class VerificationSettings(Model):
     acknowledge: Literal["never", "on_success"] = "on_success"
     rejected: list[Assertion] = Field(default_factory=list)
     expired: list[Assertion] = Field(default_factory=list)
+    allowed_origins: list[NonEmpty] = Field(default_factory=list)
+    link_path_prefix: NonEmpty | None = None
+
+    @model_validator(mode="after")
+    def check_link_policy(self):
+        if self.kind == "magic_link":
+            if not self.allowed_origins or not all(valid_origin(value) for value in self.allowed_origins):
+                raise ValueError("Magic links require exact HTTPS origins (HTTP only for loopback)")
+            prefix = self.link_path_prefix
+            if (prefix is None or not prefix.startswith("/") or prefix.startswith("//")
+                    or any(char in prefix for char in "?#\\%")
+                    or any(char.isspace() for char in prefix)
+                    or any(part in {".", ".."} for part in prefix.split("/"))):
+                raise ValueError("Magic links require an absolute path prefix without URL syntax")
+        elif self.allowed_origins or self.link_path_prefix is not None:
+            raise ValueError("Link policy is only supported for magic-link verification")
+        return self
 
     @field_validator("code_regex", "code_characters")
     @classmethod
@@ -222,7 +259,7 @@ class SiteProfile(Model):
     schema_version: Literal[1] = 1
     name: Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9_-]*$")]
     entry_url: NonEmpty
-    login_mode: Literal["password", "email_otp", "password_email_otp"]
+    login_mode: Literal["password", "email_otp", "password_email_otp", "email_magic_link"]
     credentials: dict[CredentialName, EnvironmentReference]
     steps: list[LoginStep] = Field(min_length=1)
     success: list[Assertion] = Field(min_length=1)
@@ -261,6 +298,20 @@ class SiteProfile(Model):
                     if isinstance(step, RequestOTPStep)]
         codes = [index for index, step in enumerate(self.steps)
                  if isinstance(step, FillOTPStep)]
+        link_requests = [index for index, step in enumerate(self.steps)
+                         if isinstance(step, RequestMagicLinkStep)]
+        links = [index for index, step in enumerate(self.steps) if isinstance(step, FollowMagicLinkStep)]
+        if self.login_mode == "email_magic_link":
+            if (not self.verification or self.verification.kind != "magic_link"
+                    or requests or codes or len(link_requests) != 1 or len(links) != 1):
+                raise ValueError("Magic-link login requires link verification, one request and one follow step")
+            request, follow = link_requests[0], links[0]
+            if (request >= follow or self.steps[request].optional or self.steps[follow].optional
+                    or any(index >= request for index, step in fills if not step.optional)):
+                raise ValueError("Required credentials must precede link request, followed by consumption")
+            return self
+        if links or link_requests or (self.verification and self.verification.kind != "otp"):
+            raise ValueError("Magic-link steps require email_magic_link mode")
         if self.login_mode == "password":
             if self.verification is not None or requests or codes:
                 raise ValueError("password-only login cannot include email verification")

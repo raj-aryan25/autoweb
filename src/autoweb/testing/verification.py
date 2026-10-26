@@ -29,7 +29,7 @@ class FakeVerificationProvider:
         self._sequence += 1
         return VerificationResult(
             self._values.popleft(), f"fake-{self._sequence}", datetime.now(timezone.utc),
-            "regex", request.site, request.account,
+            "link" if request.kind == "magic_link" else "regex", request.site, request.account,
         )
 
     async def acknowledge(self, result, *, success, policy, deadline):

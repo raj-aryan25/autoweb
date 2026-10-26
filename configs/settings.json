@@ -23,6 +23,9 @@
   "ai": {
     "enabled": false,
     "model": null,
+    "locator_fallback": false,
+    "screenshots": false,
+    "request_timeout_seconds": 10,
     "api_key": {
       "env": "GOOGLE_API_KEY"
     }

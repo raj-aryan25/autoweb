@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "example-email-magic-link",
+  "entry_url": "https://example.com/login",
+  "login_mode": "email_magic_link",
+  "credentials": {"email": {"env": "EXAMPLE_EMAIL"}},
+  "steps": [
+    {"action": "fill", "target": {"by": "label", "value": "Email"}, "credential": "email"},
+    {"action": "request_magic_link", "target": {"by": "role", "value": "button", "name": "Send sign-in link"}},
+    {"action": "follow_magic_link"}
+  ],
+  "verification": {
+    "kind": "magic_link",
+    "sender": "noreply@example.com",
+    "subject": "Your sign-in link",
+    "recipient": {"env": "EXAMPLE_EMAIL"},
+    "allowed_origins": ["https://example.com"],
+    "link_path_prefix": "/auth/verify",
+    "acknowledge": "on_success"
+  },
+  "success": [
+    {"type": "element", "target": {"by": "test_id", "value": "account-menu"}},
+    {"type": "url", "pattern": "https://example.com/account*"}
+  ]
+}

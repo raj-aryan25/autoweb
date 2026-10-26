@@ -14,10 +14,12 @@ from autoweb.browser import (
 )
 from autoweb.config import Configuration, ConfigurationError
 from autoweb.config.loader import resolve_path
-from autoweb.config.models import FillOTPStep, RequestOTPStep
+from autoweb.config.models import (
+    ClickStep, FillStep, FillOTPStep, FollowMagicLinkStep, RequestMagicLinkStep, RequestOTPStep,
+)
 from autoweb.contracts import VerificationError, VerificationProvider
 
-from .assertions import wait_for_authentication, watch_for_rejection
+from .assertions import check_rejection, wait_for_authentication, watch_for_rejection
 from .diagnostics import capture_failure
 from .errors import LoginError
 from .results import LoginResult, StepResult
@@ -64,7 +66,7 @@ async def _guard_steps(operation, session: BrowserSession, configuration: Config
 
 
 async def run_login(session: BrowserSession, configuration: Configuration,
-                    verification_provider: VerificationProvider | None = None) -> LoginResult:
+                    verification_provider: VerificationProvider | None = None, *, ai_client=None) -> LoginResult:
     """Log in using an existing session. Its lifetime remains the caller's responsibility.
 
     A failure raises LoginError with a structured failed result. Success returns
@@ -79,6 +81,16 @@ async def run_login(session: BrowserSession, configuration: Configuration,
     stage = "navigation"
     challenge = (EmailChallenge(configuration, verification_provider, deadline)
                  if configuration.site.verification else None)
+    navigation_stack = AsyncExitStack()
+    link_navigation = None
+    resolver = None
+    if configuration.settings.ai.enabled and configuration.settings.ai.locator_fallback:
+        from autoweb.ai.client import client_from_configuration
+        from autoweb.ai.locators import LocatorResolver
+
+        resolver = LocatorResolver(ai_client or client_from_configuration(configuration),
+                                   screenshots=configuration.settings.ai.screenshots,
+                                   request_timeout_seconds=configuration.settings.ai.request_timeout_seconds)
 
     def active_deadline() -> float:
         return challenge.deadline if challenge else deadline
@@ -90,40 +102,91 @@ async def run_login(session: BrowserSession, configuration: Configuration,
         return min(cap, remaining)
 
     async def steps() -> None:
-        nonlocal stage
+        nonlocal stage, link_navigation
         for index, step in enumerate(configuration.site.steps, start=1):
             stage = f"step:{index}:{step.action}"
-            if isinstance(step, RequestOTPStep):
+            step_deadline = monotonic() + (step.timeout_ms or configuration.settings.timeouts.action_ms) / 1000
+
+            def step_budget():
+                remaining = (step_deadline - monotonic()) * 1000
+                if remaining <= 0:
+                    raise BrowserActionTimeout(step.action)
+                return budget_ms(remaining)
+
+            if resolver and step.ai_fallback and not step.optional and not isinstance(step, FillOTPStep):
+                target = getattr(step, "target", None)
+                purpose = f"fill_{step.credential}" if isinstance(step, FillStep) else "click"
+                if target is not None and isinstance(step, (
+                    FillStep, ClickStep, RequestOTPStep, RequestMagicLinkStep,
+                )):
+                    secrets = [value.get_secret_value() for value in configuration.secrets.values()]
+                    if challenge and challenge.result:
+                        secrets.append(challenge.result.value)
+                    chosen = await resolver.resolve(
+                        session.page, target, purpose=purpose,
+                        hint=step.ai_hint or target.name or target.value,
+                        secrets=secrets, timeout_ms=step_budget(),
+                    )
+                    step = step.model_copy(update={"target": chosen})
+            if isinstance(step, (RequestOTPStep, RequestMagicLinkStep)):
                 # Baseline must finish before the one non-idempotent request click.
+                action_budget = step_budget()
                 await asyncio.wait_for(challenge.prepare(), active_deadline() - monotonic())
-                result = await click(session.page, step.target, timeout_ms=budget_ms(
-                    step.timeout_ms or configuration.settings.timeouts.action_ms))
-            elif isinstance(step, FillOTPStep):
+                step_deadline = monotonic() + action_budget / 1000
+                result = await click(session.page, step.target, timeout_ms=step_budget())
+            elif isinstance(step, FollowMagicLinkStep):
+                from autoweb.browser.magic_link import MagicLinkNavigation
+
                 selected = await asyncio.wait_for(challenge.receive(), active_deadline() - monotonic())
+                link_navigation = await navigation_stack.enter_async_context(
+                    MagicLinkNavigation(session.page, configuration.site.verification, active_deadline()))
+                try:
+                    result = await link_navigation.follow(
+                        selected.value, timeout_ms=budget_ms(step.timeout_ms or configuration.settings.timeouts.navigation_ms))
+                except BrowserActionError:
+                    await check_rejection(session.page, configuration.site, active_deadline())
+                    raise
+            elif isinstance(step, FillOTPStep):
+                action_budget = step_budget()
+                selected = await asyncio.wait_for(challenge.receive(), active_deadline() - monotonic())
+                step_deadline = monotonic() + action_budget / 1000
+                if resolver and step.ai_fallback and len(step.targets) == 1:
+                    target = step.targets[0]
+                    chosen = await resolver.resolve(
+                        session.page, target, purpose="fill_otp", hint=step.ai_hint or target.name or target.value,
+                        secrets=[value.get_secret_value() for value in configuration.secrets.values()] + [selected.value],
+                        timeout_ms=step_budget(),
+                    )
+                    step = step.model_copy(update={"targets": [chosen]})
                 result = await fill_otp(
                     session.page, step.targets, SecretStr(selected.value),
                     expected_length=configuration.site.verification.code_length,
-                    timeout_ms=budget_ms(step.timeout_ms or configuration.settings.timeouts.action_ms),
+                    timeout_ms=step_budget(),
                 )
             else:
                 result = await execute_step(
                     session, step, configuration.secrets,
-                    budget_ms(step.timeout_ms or configuration.settings.timeouts.action_ms),
+                    step_budget(),
                 )
             completed.append(StepResult(index, step.action, result))
 
     async def workflow() -> None:
         nonlocal stage
-        await navigate(
-            session.page, configuration.site.entry_url,
-            timeout_ms=budget_ms(configuration.settings.timeouts.navigation_ms),
-        )
-        await _guard_steps(steps(), session, configuration, deadline)
-        stage = "authentication"
-        await wait_for_authentication(session.page, configuration.site, active_deadline())
-        if challenge:
-            stage = "acknowledgment"
-            await challenge.acknowledge()
+        async with navigation_stack:
+            await navigate(
+                session.page, configuration.site.entry_url,
+                timeout_ms=budget_ms(configuration.settings.timeouts.navigation_ms),
+            )
+            await _guard_steps(steps(), session, configuration, deadline)
+            stage = "authentication"
+            authentication = wait_for_authentication(session.page, configuration.site, active_deadline())
+            if link_navigation:
+                await link_navigation.wait(authentication)
+            else:
+                await authentication
+            if challenge:
+                stage = "acknowledgment"
+                await challenge.acknowledge()
 
     try:
         await asyncio.wait_for(workflow(), timeout=configuration.settings.timeouts.login_seconds)
@@ -159,15 +222,21 @@ async def run_login(session: BrowserSession, configuration: Configuration,
 @asynccontextmanager
 async def authenticated_session(
     configuration: Configuration, verification_provider: VerificationProvider | None = None,
+    *, ai_client=None,
 ) -> AsyncIterator[LoginResult]:
     """Own a session, yield it only after proven authentication, and always clean up."""
     validate_login(configuration)
+    if configuration.settings.ai.enabled and ai_client is None:
+        from autoweb.ai.client import client_from_configuration
+
+        ai_client = client_from_configuration(configuration)
     async with AsyncExitStack() as stack:
         if configuration.site.verification and verification_provider is None:
             # Lazy application wiring. The core runner only knows the protocol.
             from autoweb.gmail.provider import open_gmail_provider
 
-            verification_provider = await stack.enter_async_context(open_gmail_provider(configuration))
+            options = {"ai_client": ai_client} if ai_client is not None else {}
+            verification_provider = await stack.enter_async_context(open_gmail_provider(configuration, **options))
         session = await stack.enter_async_context(open_session(configuration.settings))
-        result = await run_login(session, configuration, verification_provider)
+        result = await run_login(session, configuration, verification_provider, ai_client=ai_client)
         yield result

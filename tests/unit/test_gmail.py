@@ -284,7 +284,7 @@ def test_gemini_response_is_strict_structured_json(text, expected):
 @pytest.mark.asyncio
 async def test_gemini_adapter_is_lazy_bounded_and_uses_api_key_header(monkeypatch):
     from pydantic import SecretStr
-    import autoweb.ai.extraction as module
+    import autoweb.ai.client as module
 
     captured = []
 
@@ -304,7 +304,7 @@ async def test_gemini_adapter_is_lazy_bounded_and_uses_api_key_header(monkeypatc
     assert not captured and "private-api-key" not in repr(extractor)
     assert await extractor.extract("email", length=6, characters=r"[0-9]", timeout_seconds=1) == "001234"
     req, timeout = captured[0]
-    assert "private-api-key" not in req.full_url and timeout == 1
+    assert "private-api-key" not in req.full_url and 0 < timeout <= 1
     assert req.get_header("X-goog-api-key") == "private-api-key"
 
 

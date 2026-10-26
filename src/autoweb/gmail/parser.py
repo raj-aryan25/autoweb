@@ -10,6 +10,8 @@ from email.header import decode_header, make_header
 from email.message import Message
 from html.parser import HTMLParser
 
+from autoweb.links import valid_magic_link
+
 
 MAX_BODY_SIZE = 1_000_000
 
@@ -37,10 +39,13 @@ class _VisibleHTML(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.text: list[str] = []
         self.hidden = 0
+        self.links = []
 
     def handle_starttag(self, tag, attrs):
         if tag in {"script", "style", "head"}:
             self.hidden += 1
+        if tag == "a" and not self.hidden:
+            self.links.extend(value for key, value in attrs if key == "href" and isinstance(value, str))
         if tag in {"br", "p", "div", "li", "tr", "td", "hr"}:
             self.text.append(" ")
 
@@ -59,11 +64,12 @@ class _VisibleHTML(HTMLParser):
 class MessageBodies:
     plain: tuple[str, ...] = field(default=(), repr=False)
     html: tuple[str, ...] = field(default=(), repr=False)
+    links: tuple[str, ...] = field(default=(), repr=False)
 
 
 def decode_bodies(payload: dict) -> MessageBodies:
     """Walk nested inline MIME parts, skipping malformed data and attachments."""
-    plain, html = [], []
+    plain, html, links = [], [], []
     remaining = MAX_BODY_SIZE
 
     def visit(part: dict, depth: int = 0) -> None:
@@ -101,11 +107,12 @@ def decode_bodies(payload: dict) -> MessageBodies:
             parser.feed(text)
             parser.close()
             html.append("".join(parser.text))
+            links.extend(parser.links)
         else:
             plain.append(text)
 
     visit(payload)
-    return MessageBodies(tuple(plain), tuple(html))
+    return MessageBodies(tuple(plain), tuple(html), tuple(links))
 
 
 def valid_code(value: object, length: int, characters: str) -> bool:
@@ -138,3 +145,11 @@ def extract_code(bodies: MessageBodies, regex: str, length: int,
             return Extraction(next(iter(candidates)) if len(candidates) == 1 else None,
                               ambiguous=len(candidates) > 1)
     return Extraction()
+
+
+def extract_magic_link(bodies: MessageBodies, allowed_origins, path_prefix: str) -> Extraction:
+    candidates = set(bodies.links)
+    for text in bodies.plain:
+        candidates.update(match.rstrip(".,;:!?)") for match in re.findall(r'https?://[^\s<>"\']+', text))
+    allowed = {value for value in candidates if valid_magic_link(value, allowed_origins, path_prefix)}
+    return Extraction(next(iter(allowed)) if len(allowed) == 1 else None, ambiguous=len(allowed) > 1)

@@ -14,7 +14,7 @@ from autoweb.ai.extraction import AIExtractionError, ExtractionFallback
 from autoweb.contracts import VerificationRequest, VerificationResult
 from .client import MessageClient
 from .errors import GmailError, GmailMessageMissing, VerificationTimeout
-from .parser import decode_bodies, extract_code, headers, valid_code
+from .parser import decode_bodies, extract_code, extract_magic_link, headers, valid_code
 
 
 def _address(value: str) -> str:
@@ -117,10 +117,12 @@ class GmailVerificationProvider:
                 if monotonic() >= request.deadline:
                     raise VerificationTimeout()
                 bodies = decode_bodies(message["payload"])
-                extracted = extract_code(bodies, request.code_regex, request.code_length,
-                                         request.code_characters)
-                value, method = extracted.value, "regex"
-                if value is None and not extracted.ambiguous and self.fallback and (bodies.plain or bodies.html):
+                extracted = (extract_magic_link(bodies, request.allowed_origins, request.link_path_prefix)
+                             if request.kind == "magic_link" else
+                             extract_code(bodies, request.code_regex, request.code_length, request.code_characters))
+                value, method = extracted.value, "link" if request.kind == "magic_link" else "regex"
+                if (request.kind == "otp" and value is None and not extracted.ambiguous
+                        and self.fallback and (bodies.plain or bodies.html)):
                     timeout = min(self.request_timeout_seconds, request.deadline - monotonic())
                     try:
                         suggestion = await asyncio.wait_for(self.fallback.extract(

@@ -1,3 +1,6 @@
+# Local agent instructions stay on this machine.
+/AGENTS.md
+
 # Environments and Python caches
 venv/
 .venv/
