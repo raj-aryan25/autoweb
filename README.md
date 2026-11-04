@@ -32,6 +32,7 @@ conda run -n autoweb python -m playwright install chromium
 | src/autoweb/login/ | Password-login orchestration, authentication checks, and session handoff |
 | src/autoweb/ai/ | Shared optional Gemini client, validated extraction, and constrained locator assistance |
 | src/autoweb/reporting/ | Concise JSON step/login reports |
+| src/autoweb/metrics.py | Aggregated success rate, latency percentiles, and budget overruns |
 | src/autoweb/pytest_plugin.py | Opt-in async pytest fixtures, live selection, and diagnostics |
 | src/autoweb/testing/ | In-memory verification provider for controlled tests |
 | configs/settings.json | Non-secret browser, timeout, mailbox-path, and AI defaults |
@@ -40,10 +41,10 @@ conda run -n autoweb python -m playwright install chromium
 | tests/integration/ | Real headless Chromium checks against controlled local pages |
 | tests/e2e/ | Explicitly selected live-profile login tests |
 | tests/fixtures/ | Controlled DOM/frame pages and a cookie-authenticated login demo |
-| scripts/ | Thin password-login and independent Gmail diagnostic entry points |
+| scripts/ | Thin login, Gmail diagnostic, and local benchmark entry points |
 | artifacts/ | Ignored screenshots, JSON reports, optional sensitive traces and session state |
 
-The login package executes password and email OTP flows and returns an active authenticated session; see its [usage and local demo](src/autoweb/login/README.md). The browser package implements reusable primitives; see its [API and ownership documentation](src/autoweb/browser/README.md). Gmail can retrieve fresh codes independently; see its [setup, diagnostics, and provider contract](src/autoweb/gmail/README.md). The [pytest interface](docs/TESTING.md) provides reusable authenticated-session fixtures and diagnostics. Phase VII Part 1 adds locally verified AI locator assistance and magic links; see [setup and the validation split](docs/PHASE7.md). Live Part 2 validation is pending. Importing the package does not open a browser, authenticate with Gmail, load a dotenv file, or create an AI client. Configuration loading is explicit.
+The login package executes password and email OTP flows and returns an active authenticated session; see its [usage and local demo](src/autoweb/login/README.md). The browser package implements reusable primitives; see its [API and ownership documentation](src/autoweb/browser/README.md). Gmail can retrieve fresh codes independently; see its [setup, diagnostics, and provider contract](src/autoweb/gmail/README.md). The [pytest interface](docs/TESTING.md) provides reusable authenticated-session fixtures and diagnostics. Phase VII adds optional AI locator assistance and magic links; see [setup and the validation split](docs/PHASE7.md). Part 2 live validation succeeded for Expand Testing OTP (fresh Gmail OTP login, session reuse, logout revocation) with zero Gemini calls while AI was enabled; Gemini API returned HTTP 503 for gemini-3.8-flash and magic-link demos (Better Auth, Stytch) failed before issuing usable links. See [the live validation report](docs/PHASE7_LIVE_VALIDATION.md). Importing the package does not open a browser, authenticate with Gmail, load a dotenv file, or create an AI client. Configuration loading is explicit.
 
 ## Check configuration
 
@@ -84,8 +85,26 @@ conda run -n autoweb python -m pytest -q
 
 Tests cover profile validation, credential resolution, secret-safe output, paths, import isolation, browser lifecycle, scoped locators, nested iframes, open Shadow DOM, password/OTP filling, complete password login, authenticated-session reuse, explicit failures, and state waits. Gmail tests cover saved synthetic MIME messages, fresh-code correlation, pagination, deadlines, API/auth errors, explicit acknowledgment, and optional AI validation. Browser integration tests use a loopback HTTP server and headless Chromium. The default command skips live tests and does not use live websites or Gmail/Gemini access. See [testing and diagnostics](docs/TESTING.md) for fixture usage, repeated profile selection, explicit live commands, sensitive trace handling, and optional session-state reuse.
 
+## Measured metrics
+
+`src/autoweb/metrics.py` aggregates login outcomes into success rate, p50/p95 latency,
+per-step timing, and budget overruns. Repeat every local flow against its in-process
+fixture site (no real website or mailbox):
+
+~~~powershell
+conda run -n autoweb python -m scripts.benchmark_login --runs 10
+~~~
+
+The command prints a Markdown summary and writes JSON plus Markdown to
+`artifacts/benchmarks/`. Every run records whether the login stayed inside its
+configured deadline, and the report includes AI call and token totals. Optional
+`--input-price` and `--output-price` values add a list-price cost estimate; no
+pricing table is hardcoded. JSON login reports include an `ai` section whenever the
+caller owns a client, so a run that never needed locator fallback shows zero calls.
+
+
 ## Project history
 
 AutoWeb is a standalone repository containing the modular framework implemented through Phase VI and Phase VII Part 1. Legacy sources remain in D:/RAJ ARYAN/Codec/scaile-tech/scaile-backlink: gmail-auto/ provided reference code for Phase IV, and shadowdom-auto/ contains the earlier browser automation. They are not runtime dependencies of AutoWeb. Historical trial-codes/ experiments are excluded.
 
-Future work follows IMPLEMENTATION_PLAN.md. Deterministic email login tests require no live mailbox. An opt-in live Gmail OTP smoke test passed against Expand Testing after explicit OAuth authorization, including protected-session reuse and logout. See [setup and the runnable OTP profile](docs/EMAIL_LOGIN_SETUP.md). Phase VII Part 1 uses controlled local sites and injected AI responses. Part 2 was resumed but remains incomplete after live API/demo failures; see [the live validation report](docs/PHASE7_LIVE_VALIDATION.md).
+Future work follows IMPLEMENTATION_PLAN.md. Deterministic email login tests require no live mailbox. An opt-in live Gmail OTP smoke test passed against Expand Testing after explicit OAuth authorization, including protected-session reuse and logout. See [setup and the runnable OTP profile](docs/EMAIL_LOGIN_SETUP.md). Phase VII uses controlled local sites and injected AI responses; Part 2 live validation confirmed Expand Testing OTP success (fresh Gmail login, session reuse, logout) with zero Gemini calls while AI was enabled, though gemini-3.8-flash returned HTTP 503 and magic-link demos (Better Auth, Stytch) failed before issuing usable links (see [live validation report](docs/PHASE7_LIVE_VALIDATION.md)).

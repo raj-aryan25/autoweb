@@ -14,6 +14,8 @@ from urllib.request import Request, urlopen
 
 from pydantic import SecretStr
 
+from .usage import UsageMeter, UsageSnapshot, parse_usage
+
 
 class AIError(Exception):
     def __init__(self, reason="ai_unavailable", *, http_status=None):
@@ -77,6 +79,12 @@ class GeminiClient:
         self._model, self._key = model, api_key
         self._lock = asyncio.Lock()
         self._unavailable = False
+        self._usage = UsageMeter()
+
+    @property
+    def usage(self) -> UsageSnapshot:
+        """Per-client totals; snapshots keep counting after this call returns."""
+        return self._usage.snapshot()
 
     def _request(self, instructions, text, schema, image, timeout):
         parts = [{"text": text[:20_000]}]
@@ -99,7 +107,11 @@ class GeminiClient:
                 data = response.read(100_001)
                 if len(data) > 100_000:
                     raise AIError("ai_response_too_large")
-                return parse_object(json.loads(data))
+                payload = json.loads(data)
+                usage = parse_usage(payload)
+                if usage is not None:
+                    self._usage.record_tokens(*usage)
+                return parse_object(payload)
         except AIError:
             raise
         except HTTPError as error:
@@ -126,6 +138,7 @@ class GeminiClient:
                 async with self._lock:
                     if self._unavailable:
                         raise AIError()
+                    self._usage.record_call()
                     return await asyncio.to_thread(self._request, instructions, text, schema,
                                                    image, max(0.001, deadline - monotonic()))
             return await asyncio.wait_for(operation(), timeout_seconds)

@@ -31,3 +31,8 @@ test-results/
 
 # Historical material excluded from the active project
 trial-codes/
+IMPLEMENTATION_PLAN.md
+
+# Frontend workspace output
+node_modules/
+apps/web/dist/

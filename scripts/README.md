@@ -12,3 +12,11 @@ traces, see [testing and diagnostics](../docs/TESTING.md).
 For a visible local demo including a protected action and an observation window, use `check_local_login.py` after starting the fixture server. See the [manual verification walkthrough](../docs/MANUAL_VERIFICATION.md) for exact setup, success/failure checks, and files to customize for Gmail.
 
 Independent Gmail diagnostics run through `python -m autoweb.gmail`, `autoweb-gmail`, or `scripts/read_verification.py`. Use `--authorize` for explicit OAuth setup, or `--site` for fresh-mail polling. Codes stay hidden unless `--show-code` is selected; diagnostics never perform website actions or mark messages read. See [Gmail setup and usage](../src/autoweb/gmail/README.md). Keep these scripts thin; reusable behavior belongs in `src/autoweb/`.
+
+`benchmark_login.py` repeats every local flow against its in-process fixture site and
+writes reliability and latency figures (success rate, p50/p95, budget overruns) to
+`artifacts/benchmarks/`. It never contacts a real website or mailbox:
+
+```sh
+conda run -n autoweb python -m scripts.benchmark_login --runs 10
+```

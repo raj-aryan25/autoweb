@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 def login_report(result: "LoginResult") -> dict:
-    return {
+    report = {
         "site": result.site,
         "status": result.status,
         "elapsed_seconds": round(result.elapsed_seconds, 3),
@@ -23,6 +23,14 @@ def login_report(result: "LoginResult") -> dict:
         ],
         "artifacts": [str(path) for path in result.artifacts],
     }
+    if result.ai_usage is not None:
+        report["ai"] = {
+            "calls": result.ai_usage.calls,
+            "prompt_tokens": result.ai_usage.prompt_tokens,
+            "candidate_tokens": result.ai_usage.candidate_tokens,
+            "total_tokens": result.ai_usage.total_tokens,
+        }
+    return report
 
 
 def write_login_report(result: "LoginResult", destination: Path) -> Path:

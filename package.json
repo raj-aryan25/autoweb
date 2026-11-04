@@ -1,0 +1,10 @@
+{
+  "name": "autoweb-workspace",
+  "private": true,
+  "workspaces": ["apps/web"],
+  "scripts": {
+    "dev": "npm run dev --workspace=@autoweb/web",
+    "build": "npm run build --workspace=@autoweb/web",
+    "typecheck": "npm run typecheck --workspace=@autoweb/web"
+  }
+}

@@ -15,6 +15,16 @@ use function-scoped async fixtures and pytest-asyncio strict mode. Each browser
 fixture owns its context and closes it after setup failures, test failures, and
 normal completion. Gmail-backed live attempts must run sequentially.
 
+Add coverage to the same deterministic run; the test extra already includes
+pytest-cov:
+
+```sh
+conda run -n autoweb python -m pytest -q --cov=autoweb --cov-report=term
+```
+
+Coverage slows the suite because every browser call is traced. The current baseline
+is 92% statement coverage over 357 passing tests with five live tests skipped.
+
 Useful subsets:
 
 ```sh

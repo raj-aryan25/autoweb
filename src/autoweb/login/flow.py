@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import AsyncExitStack, asynccontextmanager
+from dataclasses import replace
 from time import monotonic
 from typing import AsyncIterator
 
 from pydantic import SecretStr
+
+from autoweb.ai.usage import UsageSnapshot
 
 from autoweb.browser import (
     BrowserActionError, BrowserActionTimeout, BrowserSession, click, fill_otp, navigate, open_session,
@@ -239,4 +242,7 @@ async def authenticated_session(
             verification_provider = await stack.enter_async_context(open_gmail_provider(configuration, **options))
         session = await stack.enter_async_context(open_session(configuration.settings))
         result = await run_login(session, configuration, verification_provider, ai_client=ai_client)
+        usage = getattr(ai_client, "usage", None)
+        if isinstance(usage, UsageSnapshot):
+            result = replace(result, ai_usage=usage)
         yield result

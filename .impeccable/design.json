@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T18:17:17.414966+00:00",
+  "title": "Design System: AutoWeb Studio",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "tonalRamp": [
+          "oklch(15.0% 0.0031 260.7)",
+          "oklch(27.0% 0.0068 260.7)",
+          "oklch(39.0% 0.0105 260.7)",
+          "oklch(51.0% 0.0108 260.7)",
+          "oklch(63.0% 0.0108 260.7)",
+          "oklch(75.0% 0.0093 260.7)",
+          "oklch(87.0% 0.0056 260.7)",
+          "oklch(95.0% 0.0031 260.7)"
+        ]
+      },
+      "sidebar": {
+        "role": "neutral",
+        "displayName": "Rail graphite",
+        "tonalRamp": [
+          "oklch(15.0% 0.0029 248.3)",
+          "oklch(27.0% 0.0063 248.3)",
+          "oklch(39.0% 0.0098 248.3)",
+          "oklch(51.0% 0.0101 248.3)",
+          "oklch(63.0% 0.0101 248.3)",
+          "oklch(75.0% 0.0086 248.3)",
+          "oklch(87.0% 0.0052 248.3)",
+          "oklch(95.0% 0.0029 248.3)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Raised graphite",
+        "tonalRamp": [
+          "oklch(15.0% 0.0041 261.7)",
+          "oklch(27.0% 0.0090 261.7)",
+          "oklch(39.0% 0.0139 261.7)",
+          "oklch(51.0% 0.0143 261.7)",
+          "oklch(63.0% 0.0143 261.7)",
+          "oklch(75.0% 0.0123 261.7)",
+          "oklch(87.0% 0.0074 261.7)",
+          "oklch(95.0% 0.0041 261.7)"
+        ]
+      },
+      "steps": {
+        "role": "neutral",
+        "displayName": "Step graphite",
+        "tonalRamp": [
+          "oklch(15.0% 0.0037 258.4)",
+          "oklch(27.0% 0.0082 258.4)",
+          "oklch(39.0% 0.0126 258.4)",
+          "oklch(51.0% 0.0130 258.4)",
+          "oklch(63.0% 0.0130 258.4)",
+          "oklch(75.0% 0.0111 258.4)",
+          "oklch(87.0% 0.0067 258.4)",
+          "oklch(95.0% 0.0037 258.4)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Cool divider",
+        "tonalRamp": [
+          "oklch(15.0% 0.0056 248.4)",
+          "oklch(27.0% 0.0124 248.4)",
+          "oklch(39.0% 0.0192 248.4)",
+          "oklch(51.0% 0.0198 248.4)",
+          "oklch(63.0% 0.0198 248.4)",
+          "oklch(75.0% 0.0169 248.4)",
+          "oklch(87.0% 0.0102 248.4)",
+          "oklch(95.0% 0.0056 248.4)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Near-white",
+        "tonalRamp": [
+          "oklch(15.0% 0.0020 247.9)",
+          "oklch(27.0% 0.0043 247.9)",
+          "oklch(39.0% 0.0067 247.9)",
+          "oklch(51.0% 0.0069 247.9)",
+          "oklch(63.0% 0.0069 247.9)",
+          "oklch(75.0% 0.0059 247.9)",
+          "oklch(87.0% 0.0036 247.9)",
+          "oklch(95.0% 0.0020 247.9)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "tonalRamp": [
+          "oklch(15.0% 0.0064 241.5)",
+          "oklch(27.0% 0.0140 241.5)",
+          "oklch(39.0% 0.0216 241.5)",
+          "oklch(51.0% 0.0222 241.5)",
+          "oklch(63.0% 0.0222 241.5)",
+          "oklch(75.0% 0.0191 241.5)",
+          "oklch(87.0% 0.0114 241.5)",
+          "oklch(95.0% 0.0064 241.5)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Clear teal",
+        "tonalRamp": [
+          "oklch(15.0% 0.0309 184.0)",
+          "oklch(27.0% 0.0680 184.0)",
+          "oklch(39.0% 0.1050 184.0)",
+          "oklch(51.0% 0.1081 184.0)",
+          "oklch(63.0% 0.1081 184.0)",
+          "oklch(75.0% 0.0927 184.0)",
+          "oklch(87.0% 0.0556 184.0)",
+          "oklch(95.0% 0.0309 184.0)"
+        ]
+      },
+      "accent-text": {
+        "role": "primary",
+        "displayName": "Pale teal",
+        "tonalRamp": [
+          "oklch(15.0% 0.0165 185.4)",
+          "oklch(27.0% 0.0364 185.4)",
+          "oklch(39.0% 0.0562 185.4)",
+          "oklch(51.0% 0.0579 185.4)",
+          "oklch(63.0% 0.0579 185.4)",
+          "oklch(75.0% 0.0496 185.4)",
+          "oklch(87.0% 0.0298 185.4)",
+          "oklch(95.0% 0.0165 185.4)"
+        ]
+      },
+      "accent-surface": {
+        "role": "primary",
+        "displayName": "Deep teal surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0082 195.8)",
+          "oklch(27.0% 0.0181 195.8)",
+          "oklch(39.0% 0.0280 195.8)",
+          "oklch(51.0% 0.0288 195.8)",
+          "oklch(63.0% 0.0288 195.8)",
+          "oklch(75.0% 0.0247 195.8)",
+          "oklch(87.0% 0.0148 195.8)",
+          "oklch(95.0% 0.0082 195.8)"
+        ]
+      },
+      "amber": {
+        "displayName": "Soft amber",
+        "tonalRamp": [
+          "oklch(15.0% 0.0256 80.0)",
+          "oklch(27.0% 0.0562 80.0)",
+          "oklch(39.0% 0.0869 80.0)",
+          "oklch(51.0% 0.0895 80.0)",
+          "oklch(63.0% 0.0895 80.0)",
+          "oklch(75.0% 0.0767 80.0)",
+          "oklch(87.0% 0.0460 80.0)",
+          "oklch(95.0% 0.0256 80.0)"
+        ]
+      },
+      "amber-surface": {
+        "displayName": "Amber surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0049 82.3)",
+          "oklch(27.0% 0.0108 82.3)",
+          "oklch(39.0% 0.0167 82.3)",
+          "oklch(51.0% 0.0172 82.3)",
+          "oklch(63.0% 0.0172 82.3)",
+          "oklch(75.0% 0.0147 82.3)",
+          "oklch(87.0% 0.0088 82.3)",
+          "oklch(95.0% 0.0049 82.3)"
+        ]
+      },
+      "danger": {
+        "displayName": "Soft red",
+        "tonalRamp": [
+          "oklch(15.0% 0.0207 31.5)",
+          "oklch(27.0% 0.0455 31.5)",
+          "oklch(39.0% 0.0704 31.5)",
+          "oklch(51.0% 0.0724 31.5)",
+          "oklch(63.0% 0.0724 31.5)",
+          "oklch(75.0% 0.0621 31.5)",
+          "oklch(87.0% 0.0373 31.5)",
+          "oklch(95.0% 0.0207 31.5)"
+        ]
+      },
+      "danger-surface": {
+        "displayName": "Failure surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0043 18.1)",
+          "oklch(27.0% 0.0094 18.1)",
+          "oklch(39.0% 0.0146 18.1)",
+          "oklch(51.0% 0.0150 18.1)",
+          "oklch(63.0% 0.0150 18.1)",
+          "oklch(75.0% 0.0129 18.1)",
+          "oklch(87.0% 0.0077 18.1)",
+          "oklch(95.0% 0.0043 18.1)"
+        ]
+      },
+      "primary-ink": {
+        "role": "primary",
+        "displayName": "Primary ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0115 179.7)",
+          "oklch(27.0% 0.0253 179.7)",
+          "oklch(39.0% 0.0391 179.7)",
+          "oklch(51.0% 0.0403 179.7)",
+          "oklch(63.0% 0.0403 179.7)",
+          "oklch(75.0% 0.0345 179.7)",
+          "oklch(87.0% 0.0207 179.7)",
+          "oklch(95.0% 0.0115 179.7)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Primary hover",
+        "tonalRamp": [
+          "oklch(15.0% 0.0258 184.2)",
+          "oklch(27.0% 0.0568 184.2)",
+          "oklch(39.0% 0.0878 184.2)",
+          "oklch(51.0% 0.0904 184.2)",
+          "oklch(63.0% 0.0904 184.2)",
+          "oklch(75.0% 0.0775 184.2)",
+          "oklch(87.0% 0.0465 184.2)",
+          "oklch(95.0% 0.0258 184.2)"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field graphite",
+        "tonalRamp": [
+          "oklch(15.0% 0.0038 243.5)",
+          "oklch(27.0% 0.0083 243.5)",
+          "oklch(39.0% 0.0128 243.5)",
+          "oklch(51.0% 0.0131 243.5)",
+          "oklch(63.0% 0.0131 243.5)",
+          "oklch(75.0% 0.0113 243.5)",
+          "oklch(87.0% 0.0068 243.5)",
+          "oklch(95.0% 0.0038 243.5)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field border",
+        "tonalRamp": [
+          "oklch(15.0% 0.0082 242.8)",
+          "oklch(27.0% 0.0181 242.8)",
+          "oklch(39.0% 0.0279 242.8)",
+          "oklch(51.0% 0.0288 242.8)",
+          "oklch(63.0% 0.0288 242.8)",
+          "oklch(75.0% 0.0247 242.8)",
+          "oklch(87.0% 0.0148 242.8)",
+          "oklch(95.0% 0.0082 242.8)"
+        ]
+      },
+      "nav-active": {
+        "role": "primary",
+        "displayName": "Navigation teal",
+        "tonalRamp": [
+          "oklch(15.0% 0.0089 192.5)",
+          "oklch(27.0% 0.0195 192.5)",
+          "oklch(39.0% 0.0302 192.5)",
+          "oklch(51.0% 0.0311 192.5)",
+          "oklch(63.0% 0.0311 192.5)",
+          "oklch(75.0% 0.0266 192.5)",
+          "oklch(87.0% 0.0160 192.5)",
+          "oklch(95.0% 0.0089 192.5)"
+        ]
+      },
+      "nav-active-text": {
+        "role": "primary",
+        "displayName": "Navigation teal text",
+        "tonalRamp": [
+          "oklch(15.0% 0.0245 185.6)",
+          "oklch(27.0% 0.0539 185.6)",
+          "oklch(39.0% 0.0834 185.6)",
+          "oklch(51.0% 0.0858 185.6)",
+          "oklch(63.0% 0.0858 185.6)",
+          "oklch(75.0% 0.0736 185.6)",
+          "oklch(87.0% 0.0441 185.6)",
+          "oklch(95.0% 0.0245 185.6)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Run and page titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Inspector headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Primary interface content and explanatory paragraphs."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metadata, fields, and supporting information."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Run identifiers, times, and counts; use tabular numerals."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "step-state",
+        "value": "background-color 180ms ease-out, border-color 180ms ease-out",
+        "purpose": "Step hover and selection changes; disabled under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-inspector",
+        "value": "1600px"
+      },
+      {
+        "name": "compact-workspace",
+        "value": "1250px"
+      },
+      {
+        "name": "narrow-workspace",
+        "value": "1050px"
+      },
+      {
+        "name": "stacked",
+        "value": "740px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Start or continue the main run action.",
+      "html": "<button class=\"ds-primary\">Continue demo</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;min-height:40px;border:1px solid #47535c;border-radius:7px;background:transparent;color:var(--text,#e7ebef);font-weight:500;white-space:nowrap;cursor:pointer;font-family:'DM Sans Variable', 'DM Sans', sans-serif;font-size:14px;background:var(--accent,#5ed3c4);border-color:transparent;color:#12332d;font-weight:600;}.ds-primary:hover:not(:disabled){background:#87e3d6;}.ds-primary:disabled{background:#2b4541;color:#b0c4bd;cursor:not-allowed;}.ds-primary:focus-visible{outline:2px solid var(--accent,#5ed3c4);outline-offset:4px;}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outlined configuration and secondary actions.",
+      "html": "<button class=\"ds-secondary\">Run configuration</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;min-height:40px;border:1px solid #47535c;border-radius:7px;background:transparent;color:var(--text,#e7ebef);font-weight:500;white-space:nowrap;cursor:pointer;font-family:'DM Sans Variable', 'DM Sans', sans-serif;font-size:14px;}.ds-secondary:hover:not(:disabled){background:#2c353d;border-color:#778892;}.ds-secondary:disabled{color:#9ba7ad;background:#272e33;border-color:#3b454c;cursor:not-allowed;}.ds-secondary:focus-visible{outline:2px solid var(--accent,#5ed3c4);outline-offset:4px;}"
+    },
+    {
+      "name": "Stop button",
+      "kind": "button",
+      "refersTo": "button-stop",
+      "description": "Muted failure-toned action for stopping a run.",
+      "html": "<button class=\"ds-stop\">Stop demo</button>",
+      "css": ".ds-stop{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;min-height:40px;border:1px solid #47535c;border-radius:7px;background:transparent;color:var(--text,#e7ebef);font-weight:500;white-space:nowrap;cursor:pointer;font-family:'DM Sans Variable', 'DM Sans', sans-serif;font-size:14px;background:var(--danger-surface,#312727);border-color:#70524d;color:#f0c5bd;}.ds-stop:hover:not(:disabled){background:#2c353d;border-color:#778892;}.ds-stop:disabled{color:#9ba7ad;background:#272e33;border-color:#3b454c;cursor:not-allowed;}.ds-stop:focus-visible{outline:2px solid var(--accent,#5ed3c4);outline-offset:4px;}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labeled local configuration field.",
+      "html": "<label class=\"ds-field\">Slow motion (ms)<input class=\"ds-input\" type=\"number\" min=\"0\" value=\"250\" placeholder=\"250\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:9px;max-width:300px;color:#c1ced6;font-size:12px;font-family:'DM Sans Variable', 'DM Sans', sans-serif;}.ds-input{width:100%;min-height:41px;padding:10px 12px;background:#181e23;border:1px solid #50606d;color:var(--text,#e7ebef);border-radius:6px;font-size:13px;font-family:'DM Sans Variable', 'DM Sans', sans-serif;caret-color:var(--accent,#5ed3c4);}.ds-input::placeholder{color:#a3b2bd;}.ds-input:invalid:not(:placeholder-shown){border-color:var(--danger,#f0b4a8);}.ds-input:focus-visible{outline:2px solid var(--accent,#5ed3c4);outline-offset:4px;}"
+    },
+    {
+      "name": "Dropdown",
+      "kind": "input",
+      "refersTo": "select",
+      "description": "Native configuration selection.",
+      "html": "<label class=\"ds-select-label\">Browser engine<select class=\"ds-select\"><option>Chromium</option><option>Firefox</option><option>WebKit</option></select></label>",
+      "css": ".ds-select-label{display:flex;flex-direction:column;gap:9px;max-width:300px;color:#c1ced6;font-size:12px;font-family:'DM Sans Variable', 'DM Sans', sans-serif;}.ds-select{width:100%;min-height:41px;padding:10px 12px;background:#181e23;border:1px solid #50606d;color:var(--text,#e7ebef);border-radius:6px;font-size:13px;font-family:'DM Sans Variable', 'DM Sans', sans-serif;padding-right:24px;color-scheme:dark;}.ds-select:focus-visible{outline:2px solid var(--accent,#5ed3c4);outline-offset:4px;}"
+    },
+    {
+      "name": "Navigation item",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "Current page in the navigation rail.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Example navigation\"><a href=\"#workspace\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M3 9h18M9 9v11\"/></svg>Workspace</a></nav>",
+      "css": ".ds-nav{max-width:200px;background:var(--sidebar,#14181c);padding:10px;font-family:'DM Sans Variable', 'DM Sans', sans-serif;font-size:14px;}.ds-nav a{display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:7px;font-weight:500;color:#b0bbc4;text-decoration:none;}.ds-nav a:hover{background:#262d34;color:var(--text,#e7ebef);}.ds-nav a[aria-current]{background:#213a39;color:#90e7dc;}.ds-nav a:focus-visible{outline:2px solid var(--accent,#5ed3c4);outline-offset:4px;}"
+    },
+    {
+      "name": "Waiting status badge",
+      "kind": "chip",
+      "refersTo": "chip-waiting",
+      "description": "Noninteractive state label paired with a visible dot.",
+      "html": "<span class=\"ds-waiting\"><span aria-hidden=\"true\"></span>Waiting</span>",
+      "css": ".ds-waiting{display:inline-flex;align-items:center;gap:7px;padding:5px 9px;border-radius:5px;font-family:'DM Sans Variable', 'DM Sans', sans-serif;font-size:12px;white-space:nowrap;background:var(--amber-surface,#332e25);color:var(--amber,#f0cb8d);}.ds-waiting>span{width:6px;height:6px;border-radius:50%;background:currentColor;}"
+    },
+    {
+      "name": "Configuration container",
+      "kind": "card",
+      "refersTo": "configuration-card",
+      "description": "Flat settings panel with structural border.",
+      "html": "<section class=\"ds-card\"><h2>Run configuration</h2><p>Choose the profile and browser settings for the next demo.</p></section>",
+      "css": ".ds-card{padding:23px 32px;background:#20262c;border:1px solid var(--border,#343d46);border-radius:8px;color:var(--text,#e7ebef);font-family:'DM Sans Variable', 'DM Sans', sans-serif;font-size:14px;}.ds-card h2{font-size:18px;font-weight:550;letter-spacing:-.4px;line-height:1.35;margin:0 0 5px;}.ds-card p{font-size:13px;line-height:1.65;color:var(--muted,#a5b3be);margin:0;}"
+    },
+    {
+      "name": "Selected execution step",
+      "kind": "custom",
+      "refersTo": "step-selected",
+      "description": "Current step with progress marker and operational detail.",
+      "html": "<button class=\"ds-step\" aria-current=\"step\"><span class=\"ds-marker\">4</span><span class=\"ds-copy\"><span class=\"ds-title\">Wait for verification email</span><span class=\"ds-subtitle\">Checking for a fresh message</span></span><span class=\"ds-duration\">12.0s</span></button>",
+      "css": ".ds-step{display:flex;align-items:flex-start;gap:11px;width:100%;max-width:320px;padding:13px 11px;border:1px solid #507d76;border-radius:8px;background:var(--accent-surface,#233a3a);color:var(--text,#e7ebef);text-align:left;cursor:pointer;transition:background-color 180ms ease-out,border-color 180ms ease-out;font-family:'DM Sans Variable', 'DM Sans', sans-serif;font-size:14px;}.ds-step:hover{background:#283239;}.ds-marker{display:grid;place-items:center;flex-shrink:0;width:23px;height:23px;border:1px solid #6acfc1;border-radius:50%;color:var(--accent,#5ed3c4);font-family:'IBM Plex Mono', monospace;font-size:12px;}.ds-copy{display:block;flex:1;min-width:0;}.ds-title{display:block;color:var(--accent-text,#b8f0e8);font-size:13px;font-weight:500;line-height:1.5;margin-top:1px;}.ds-subtitle{display:block;color:#bbd1cc;font-size:12px;line-height:1.45;margin-top:4px;}.ds-duration{font-family:'IBM Plex Mono', monospace;font-size:12px;padding-top:4px;color:#b5c4ce;font-variant-numeric:tabular-nums;}.ds-step:focus-visible{outline:2px solid var(--accent,#5ed3c4);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-step{transition:none;}}"
+    },
+    {
+      "name": "Inspector tabs",
+      "kind": "nav",
+      "refersTo": "inspector-tab",
+      "description": "Underline selection keeps the inspector context compact.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\" aria-label=\"Step inspection\"><button role=\"tab\" aria-selected=\"true\">Details</button><button role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">Evidence</button><button role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">Events</button></div>",
+      "css": ".ds-tabs{display:flex;gap:26px;border-bottom:1px solid var(--border,#343d46);}.ds-tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:0 0 13px;color:var(--muted,#a5b3be);font-family:'DM Sans Variable', 'DM Sans', sans-serif;font-size:13px;cursor:pointer;}.ds-tabs button:hover{color:var(--text,#e7ebef);}.ds-tabs button[aria-selected=\"true\"]{color:var(--accent,#5ed3c4);border-color:var(--accent,#5ed3c4);}.ds-tabs button:focus-visible{outline:2px solid var(--accent,#5ed3c4);outline-offset:4px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Split workspace",
+    "overview": "AutoWeb Studio uses the user-selected graphite and teal palette: a quiet dark workspace with clearly marked actions and inspectable execution state. Dense information stays legible through restrained headings, generous section padding, and a separate monospace voice for measurements.\n\nSurfaces are flat and divided by fine borders. Teal connects the primary action, current navigation, selected step, and keyboard focus; semantic status colors explain waiting and failure alongside text and icons.",
+    "keyCharacteristics": [
+      "Graphite surfaces with teal interaction cues.",
+      "Compact controls and readable operational detail.",
+      "Flat tonal layering and thin structural dividers.",
+      "DM Sans interface paired with IBM Plex Mono data."
+    ],
+    "rules": [
+      {
+        "name": "The State Pairing Rule",
+        "body": "Status color accompanies a readable state label or icon.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do use teal for primary actions, selection, and keyboard focus.",
+      "Do pair semantic color with readable status text or an icon.",
+      "Do preserve the monospace treatment for run IDs, times, and counts.",
+      "Do let navigation, steps, and inspector stack and scroll naturally on small screens."
+    ],
+    "donts": [
+      "Don't replace the graphite and teal palette with unrelated accents.",
+      "Don't add decorative shadows to the flat workspace.",
+      "Don't hide keyboard focus or rely on color alone to explain a run state.",
+      "Don't use the selected-step fill for every step in the sequence."
+    ]
+  }
+}

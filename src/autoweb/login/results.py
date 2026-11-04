@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Literal
 from autoweb.contracts import ActionResult
 
 if TYPE_CHECKING:
+    from autoweb.ai.usage import UsageSnapshot
     from autoweb.browser import BrowserSession
 
 
@@ -29,3 +30,4 @@ class LoginResult:
     reason: str | None = None
     artifacts: tuple[Path, ...] = ()
     session: BrowserSession | None = field(default=None, repr=False)
+    ai_usage: "UsageSnapshot | None" = field(default=None, repr=False)
