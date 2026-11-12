@@ -1,0 +1,1318 @@
+{
+  "$defs": {
+    "AIUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "calls": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Calls",
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "candidate_tokens": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Candidate Tokens",
+          "type": "integer"
+        },
+        "total_tokens": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Total Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "calls",
+        "prompt_tokens",
+        "candidate_tokens",
+        "total_tokens"
+      ],
+      "title": "AIUsage",
+      "type": "object"
+    },
+    "ArtifactRegistered": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "artifact_registered",
+          "title": "Type",
+          "type": "string"
+        },
+        "artifact_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "masked_screenshot",
+            "sanitized_report"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "artifact_id",
+        "kind"
+      ],
+      "title": "ArtifactRegistered",
+      "type": "object"
+    },
+    "BrowserSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "default": "chromium",
+          "enum": [
+            "chromium",
+            "firefox",
+            "webkit"
+          ],
+          "title": "Engine",
+          "type": "string"
+        },
+        "headless": {
+          "default": true,
+          "title": "Headless",
+          "type": "boolean"
+        },
+        "slow_mo_ms": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Slow Mo Ms",
+          "type": "integer"
+        },
+        "launch_timeout_ms": {
+          "default": 30000,
+          "exclusiveMinimum": 0,
+          "title": "Launch Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "title": "BrowserSettings",
+      "type": "object"
+    },
+    "ContractScenario": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "enum": [
+            "success",
+            "skip",
+            "timeout",
+            "cancellation",
+            "reconnect",
+            "resync",
+            "interruption"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "connection": {
+          "enum": [
+            "connecting",
+            "connected",
+            "reconnecting",
+            "disconnected"
+          ],
+          "title": "Connection",
+          "type": "string"
+        },
+        "transport": {
+          "$ref": "#/$defs/Replay"
+        }
+      },
+      "required": [
+        "name",
+        "connection",
+        "transport"
+      ],
+      "title": "ContractScenario",
+      "type": "object"
+    },
+    "DisplayStep": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "phase",
+            "action"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "action": {
+          "anyOf": [
+            {
+              "enum": [
+                "click",
+                "submit",
+                "accept_cookies",
+                "open_login",
+                "fill",
+                "wait_for",
+                "request_otp",
+                "fill_otp",
+                "request_magic_link",
+                "follow_magic_link"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "optional": {
+          "default": false,
+          "title": "Optional",
+          "type": "boolean"
+        },
+        "phases": {
+          "items": {
+            "const": "verification_wait",
+            "type": "string"
+          },
+          "title": "Phases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind"
+      ],
+      "title": "DisplayStep",
+      "type": "object"
+    },
+    "EffectiveSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "browser": {
+          "$ref": "#/$defs/BrowserSettings"
+        },
+        "timeouts": {
+          "$ref": "#/$defs/TimeoutSettings"
+        },
+        "ai_enabled": {
+          "title": "Ai Enabled",
+          "type": "boolean"
+        },
+        "ai_model": {
+          "anyOf": [
+            {
+              "pattern": "^(?:models/)?[A-Za-z0-9._-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ai Model"
+        }
+      },
+      "required": [
+        "browser",
+        "timeouts",
+        "ai_enabled"
+      ],
+      "title": "EffectiveSettings",
+      "type": "object"
+    },
+    "FinalOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "final_outcome",
+          "title": "Type",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "cancelled",
+            "interrupted"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "authentication": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "not_observed"
+          ],
+          "title": "Authentication",
+          "type": "string"
+        },
+        "diagnostic": {
+          "anyOf": [
+            {
+              "enum": [
+                "not_configured",
+                "unavailable",
+                "invalid_configuration",
+                "verification_timeout",
+                "login_timeout",
+                "step_timeout",
+                "authentication_rejected",
+                "optional_target_absent",
+                "browser_start_failed",
+                "worker_failed",
+                "cleanup_failed",
+                "user_stop",
+                "service_restart",
+                "login_failed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagnostic"
+        },
+        "ai_usage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AIUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "type",
+        "state",
+        "authentication"
+      ],
+      "title": "FinalOutcome",
+      "type": "object"
+    },
+    "Manifest": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "manifest",
+          "title": "Type",
+          "type": "string"
+        },
+        "profile_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/DisplayStep"
+          },
+          "maxItems": 266,
+          "title": "Steps",
+          "type": "array"
+        },
+        "effective": {
+          "$ref": "#/$defs/EffectiveSettings"
+        }
+      },
+      "required": [
+        "type",
+        "profile_id",
+        "steps",
+        "effective"
+      ],
+      "title": "Manifest",
+      "type": "object"
+    },
+    "PhasePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "browser_startup",
+            "navigation",
+            "authentication",
+            "cleanup",
+            "verification_baseline",
+            "acknowledgment"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "started",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "diagnostic": {
+          "anyOf": [
+            {
+              "enum": [
+                "not_configured",
+                "unavailable",
+                "invalid_configuration",
+                "verification_timeout",
+                "login_timeout",
+                "step_timeout",
+                "authentication_rejected",
+                "optional_target_absent",
+                "browser_start_failed",
+                "worker_failed",
+                "cleanup_failed",
+                "user_stop",
+                "service_restart",
+                "login_failed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagnostic"
+        }
+      },
+      "required": [
+        "type",
+        "status"
+      ],
+      "title": "PhasePayload",
+      "type": "object"
+    },
+    "PreflightPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "preflight",
+          "title": "Type",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "started",
+            "ready",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "diagnostic": {
+          "anyOf": [
+            {
+              "enum": [
+                "not_configured",
+                "unavailable",
+                "invalid_configuration",
+                "verification_timeout",
+                "login_timeout",
+                "step_timeout",
+                "authentication_rejected",
+                "optional_target_absent",
+                "browser_start_failed",
+                "worker_failed",
+                "cleanup_failed",
+                "user_stop",
+                "service_restart",
+                "login_failed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagnostic"
+        }
+      },
+      "required": [
+        "type",
+        "status"
+      ],
+      "title": "PreflightPayload",
+      "type": "object"
+    },
+    "PreflightRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "profile_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "overrides": {
+          "$ref": "#/$defs/RunOverrides"
+        }
+      },
+      "required": [
+        "profile_id"
+      ],
+      "title": "PreflightRequest",
+      "type": "object"
+    },
+    "PreflightResult": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "ready",
+            "unavailable",
+            "invalid_configuration"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "manifest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Manifest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "external_services": {
+          "const": "unverified",
+          "default": "unverified",
+          "title": "External Services",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "PreflightResult",
+      "type": "object"
+    },
+    "ProfileDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "display_name": {
+          "enum": [
+            "Controlled password",
+            "Controlled OTP",
+            "Controlled magic link",
+            "Practice Test Automation",
+            "Expand Testing"
+          ],
+          "title": "Display Name",
+          "type": "string"
+        },
+        "login_mode": {
+          "enum": [
+            "password",
+            "email_otp",
+            "password_email_otp",
+            "email_magic_link"
+          ],
+          "title": "Login Mode",
+          "type": "string"
+        },
+        "classification": {
+          "enum": [
+            "controlled",
+            "live"
+          ],
+          "title": "Classification",
+          "type": "string"
+        },
+        "authorization": {
+          "enum": [
+            "controlled_local",
+            "explicit_selection_required"
+          ],
+          "title": "Authorization",
+          "type": "string"
+        },
+        "readiness": {
+          "default": "unverified",
+          "enum": [
+            "unverified",
+            "configured",
+            "ready",
+            "unavailable"
+          ],
+          "title": "Readiness",
+          "type": "string"
+        },
+        "required_capabilities": {
+          "items": {
+            "enum": [
+              "browser",
+              "fixture_server",
+              "in_memory_verification",
+              "gmail"
+            ],
+            "type": "string"
+          },
+          "title": "Required Capabilities",
+          "type": "array"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/DisplayStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "display_name",
+        "login_mode",
+        "classification",
+        "authorization",
+        "required_capabilities",
+        "steps"
+      ],
+      "title": "ProfileDescriptor",
+      "type": "object"
+    },
+    "Replay": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "replay",
+            "resync_required"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "after_sequence": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "After Sequence",
+          "type": "integer"
+        },
+        "snapshot": {
+          "$ref": "#/$defs/RunSnapshot"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/RunEvent"
+          },
+          "title": "Events",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "after_sequence",
+        "snapshot",
+        "events"
+      ],
+      "title": "Replay",
+      "type": "object"
+    },
+    "RunEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "run_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sequence": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "elapsed_seconds": {
+          "minimum": 0,
+          "title": "Elapsed Seconds",
+          "type": "number"
+        },
+        "step_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "phase_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "payload": {
+          "discriminator": {
+            "mapping": {
+              "acknowledgment": "#/$defs/PhasePayload",
+              "artifact_registered": "#/$defs/ArtifactRegistered",
+              "authentication": "#/$defs/PhasePayload",
+              "browser_startup": "#/$defs/PhasePayload",
+              "cleanup": "#/$defs/PhasePayload",
+              "final_outcome": "#/$defs/FinalOutcome",
+              "navigation": "#/$defs/PhasePayload",
+              "preflight": "#/$defs/PreflightPayload",
+              "run_state_changed": "#/$defs/RunStateChanged",
+              "step_completed": "#/$defs/StepCompleted",
+              "step_started": "#/$defs/StepStarted",
+              "verification_baseline": "#/$defs/PhasePayload",
+              "verification_wait": "#/$defs/VerificationWait"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/PreflightPayload"
+            },
+            {
+              "$ref": "#/$defs/PhasePayload"
+            },
+            {
+              "$ref": "#/$defs/StepStarted"
+            },
+            {
+              "$ref": "#/$defs/StepCompleted"
+            },
+            {
+              "$ref": "#/$defs/VerificationWait"
+            },
+            {
+              "$ref": "#/$defs/ArtifactRegistered"
+            },
+            {
+              "$ref": "#/$defs/RunStateChanged"
+            },
+            {
+              "$ref": "#/$defs/FinalOutcome"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "sequence",
+        "timestamp",
+        "elapsed_seconds",
+        "step_id",
+        "phase_id",
+        "payload"
+      ],
+      "title": "RunEvent",
+      "type": "object"
+    },
+    "RunOverrides": {
+      "additionalProperties": false,
+      "properties": {
+        "headless": {
+          "default": false,
+          "title": "Headless",
+          "type": "boolean"
+        },
+        "slow_mo_ms": {
+          "default": 0,
+          "maximum": 2000,
+          "minimum": 0,
+          "title": "Slow Mo Ms",
+          "type": "integer"
+        },
+        "login_timeout_seconds": {
+          "default": 120,
+          "maximum": 600,
+          "minimum": 1,
+          "title": "Login Timeout Seconds",
+          "type": "integer"
+        },
+        "verification_timeout_seconds": {
+          "default": 60,
+          "maximum": 600,
+          "minimum": 1,
+          "title": "Verification Timeout Seconds",
+          "type": "integer"
+        },
+        "ai_enabled": {
+          "default": false,
+          "title": "Ai Enabled",
+          "type": "boolean"
+        }
+      },
+      "title": "RunOverrides",
+      "type": "object"
+    },
+    "RunPage": {
+      "additionalProperties": false,
+      "properties": {
+        "runs": {
+          "items": {
+            "$ref": "#/$defs/RunRecord"
+          },
+          "title": "Runs",
+          "type": "array"
+        },
+        "total": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "offset": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "limit": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "active_run_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Active Run Id"
+        }
+      },
+      "required": [
+        "runs",
+        "total",
+        "offset",
+        "limit"
+      ],
+      "title": "RunPage",
+      "type": "object"
+    },
+    "RunRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "snapshot": {
+          "$ref": "#/$defs/RunSnapshot"
+        },
+        "request_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "overrides": {
+          "$ref": "#/$defs/RunOverrides"
+        },
+        "manifest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Manifest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "cleanup_verified": {
+          "title": "Cleanup Verified",
+          "type": "boolean"
+        },
+        "cleanup_required": {
+          "title": "Cleanup Required",
+          "type": "boolean"
+        },
+        "authentication": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "not_observed"
+          ],
+          "title": "Authentication",
+          "type": "string"
+        }
+      },
+      "required": [
+        "snapshot",
+        "request_id",
+        "overrides",
+        "created_at",
+        "updated_at",
+        "active",
+        "cleanup_verified",
+        "cleanup_required",
+        "authentication"
+      ],
+      "title": "RunRecord",
+      "type": "object"
+    },
+    "RunSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "run_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "profile_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "created",
+            "preflight",
+            "running",
+            "stopping",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "interrupted"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "cursor": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/StepSnapshot"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FinalOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "profile_id",
+        "state",
+        "cursor",
+        "steps"
+      ],
+      "title": "RunSnapshot",
+      "type": "object"
+    },
+    "RunStateChanged": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "run_state_changed",
+          "title": "Type",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "created",
+            "preflight",
+            "running",
+            "stopping",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "interrupted"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "state"
+      ],
+      "title": "RunStateChanged",
+      "type": "object"
+    },
+    "StartRun": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "profile_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "overrides": {
+          "$ref": "#/$defs/RunOverrides"
+        }
+      },
+      "required": [
+        "request_id",
+        "profile_id"
+      ],
+      "title": "StartRun",
+      "type": "object"
+    },
+    "StepCompleted": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "step_completed",
+          "title": "Type",
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "click",
+            "submit",
+            "accept_cookies",
+            "open_login",
+            "fill",
+            "wait_for",
+            "request_otp",
+            "fill_otp",
+            "request_magic_link",
+            "follow_magic_link"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "succeeded",
+            "skipped",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "diagnostic": {
+          "anyOf": [
+            {
+              "enum": [
+                "not_configured",
+                "unavailable",
+                "invalid_configuration",
+                "verification_timeout",
+                "login_timeout",
+                "step_timeout",
+                "authentication_rejected",
+                "optional_target_absent",
+                "browser_start_failed",
+                "worker_failed",
+                "cleanup_failed",
+                "user_stop",
+                "service_restart",
+                "login_failed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagnostic"
+        }
+      },
+      "required": [
+        "type",
+        "action",
+        "status"
+      ],
+      "title": "StepCompleted",
+      "type": "object"
+    },
+    "StepSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "pending",
+            "running",
+            "waiting",
+            "succeeded",
+            "skipped",
+            "failed",
+            "cancelled",
+            "not_executed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "elapsed_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsed Seconds"
+        },
+        "diagnostic": {
+          "anyOf": [
+            {
+              "enum": [
+                "not_configured",
+                "unavailable",
+                "invalid_configuration",
+                "verification_timeout",
+                "login_timeout",
+                "step_timeout",
+                "authentication_rejected",
+                "optional_target_absent",
+                "browser_start_failed",
+                "worker_failed",
+                "cleanup_failed",
+                "user_stop",
+                "service_restart",
+                "login_failed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagnostic"
+        }
+      },
+      "required": [
+        "step_id",
+        "state"
+      ],
+      "title": "StepSnapshot",
+      "type": "object"
+    },
+    "StepStarted": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "step_started",
+          "title": "Type",
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "click",
+            "submit",
+            "accept_cookies",
+            "open_login",
+            "fill",
+            "wait_for",
+            "request_otp",
+            "fill_otp",
+            "request_magic_link",
+            "follow_magic_link"
+          ],
+          "title": "Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "action"
+      ],
+      "title": "StepStarted",
+      "type": "object"
+    },
+    "TimeoutSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "action_ms": {
+          "default": 5000,
+          "exclusiveMinimum": 0,
+          "title": "Action Ms",
+          "type": "integer"
+        },
+        "navigation_ms": {
+          "default": 30000,
+          "exclusiveMinimum": 0,
+          "title": "Navigation Ms",
+          "type": "integer"
+        },
+        "login_seconds": {
+          "default": 120,
+          "exclusiveMinimum": 0,
+          "title": "Login Seconds",
+          "type": "number"
+        },
+        "verification_seconds": {
+          "default": 60,
+          "exclusiveMinimum": 0,
+          "title": "Verification Seconds",
+          "type": "number"
+        }
+      },
+      "title": "TimeoutSettings",
+      "type": "object"
+    },
+    "VerificationWait": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "verification_wait",
+          "title": "Type",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "started",
+            "received",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "otp",
+            "magic_link"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "diagnostic": {
+          "anyOf": [
+            {
+              "enum": [
+                "not_configured",
+                "unavailable",
+                "invalid_configuration",
+                "verification_timeout",
+                "login_timeout",
+                "step_timeout",
+                "authentication_rejected",
+                "optional_target_absent",
+                "browser_start_failed",
+                "worker_failed",
+                "cleanup_failed",
+                "user_stop",
+                "service_restart",
+                "login_failed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagnostic"
+        }
+      },
+      "required": [
+        "type",
+        "status",
+        "kind"
+      ],
+      "title": "VerificationWait",
+      "type": "object"
+    }
+  },
+  "maxItems": 7,
+  "minItems": 7,
+  "prefixItems": [
+    {
+      "$ref": "#/$defs/ContractScenario"
+    },
+    {
+      "$ref": "#/$defs/ProfileDescriptor"
+    },
+    {
+      "$ref": "#/$defs/StartRun"
+    },
+    {
+      "$ref": "#/$defs/PreflightRequest"
+    },
+    {
+      "$ref": "#/$defs/PreflightResult"
+    },
+    {
+      "$ref": "#/$defs/RunRecord"
+    },
+    {
+      "$ref": "#/$defs/RunPage"
+    }
+  ],
+  "type": "array"
+}

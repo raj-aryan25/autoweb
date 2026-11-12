@@ -11,6 +11,8 @@ import pytest_asyncio
 from autoweb.config import load_configuration
 from autoweb.gmail import GmailVerificationProvider
 from autoweb.login import LoginError, authenticated_session
+from autoweb.login import ProgressObserver
+from tests.fixtures.progress import assert_boundaries, states
 from tests.fixtures.email_site import DEMO_EMAIL
 from tests.fixtures.magic_site import MagicSite
 
@@ -93,6 +95,33 @@ async def test_magic_link_preserves_request_cookie_and_authenticated_session(mag
         assert "token=" not in repr(result)
     assert active.page.is_closed()
     assert site.request_count == site.verify_count == 1
+
+
+@pytest.mark.parametrize("scenario", ["normal", "external-redirect"])
+async def test_magic_link_progress_is_real_and_excludes_link_values(magic_setup, scenario):
+    site, configuration_factory = magic_setup
+    configuration = configuration_factory(scenario, timeout=3)
+    provider = GmailVerificationProvider(Mailbox(site), poll_interval_seconds=0.01)
+    observer = ProgressObserver()
+    if scenario == "normal":
+        async with authenticated_session(configuration, provider, observer=observer) as result:
+            assert result.status == "succeeded"
+    else:
+        with pytest.raises(LoginError) as failure:
+            async with authenticated_session(configuration, provider, observer=observer):
+                pytest.fail("External redirects must fail")
+        assert failure.value.result.reason == "verification_link_rejected"
+    events = observer.drain()
+    assert_boundaries(events, configuration)
+    assert states(events, "verification_wait") == ["started", "succeeded"]
+    waiter = next(event for event in events if event.kind == "verification_wait")
+    consumer = next(event for event in events if event.kind == "step" and event.action == "follow_magic_link")
+    assert waiter.step_id == consumer.step_id
+    assert states(events, "login_outcome") == ["succeeded" if scenario == "normal" else "failed"]
+    text = repr(events)
+    assert "token=" not in text and "http://" not in text and DEMO_EMAIL not in text
+    assert all(token not in text for token in site.challenges)
+    assert site.request_count == site.verify_count == 1 and site.outside_count == 0
 
 
 @pytest.mark.parametrize("scenario,reason", [

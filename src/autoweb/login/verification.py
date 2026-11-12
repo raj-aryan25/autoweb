@@ -10,28 +10,32 @@ from autoweb.contracts import (
     VerificationError, VerificationProvider, VerificationRequest, VerificationResult,
 )
 from autoweb.links import valid_magic_link
+from .progress import Progress
 
 
 class EmailChallenge:
     def __init__(self, configuration: Configuration, provider: VerificationProvider,
-                 login_deadline: float):
+                 login_deadline: float, *, progress: Progress | None = None):
         self.configuration = configuration
         self.provider = provider
         self.login_deadline = login_deadline
         self.deadline = login_deadline
         self.request: VerificationRequest | None = None
         self.result: VerificationResult | None = None
+        self.progress = progress or Progress(None, configuration.site)
 
-    async def prepare(self) -> None:
+    async def prepare(self, *, step_id="verification_baseline") -> None:
         verification = self.configuration.site.verification
         timeout = verification.timeout_seconds or self.configuration.settings.timeouts.verification_seconds
         self.deadline = min(self.login_deadline, monotonic() + timeout)
         recipient = self.configuration.secrets["verification:recipient"].get_secret_value()
+        self.progress.start("verification_baseline", step_id=step_id)
         baseline = await asyncio.wait_for(
             self.provider.baseline(verification.sender, recipient, verification.subject,
                                    deadline=self.deadline),
             max(0, self.deadline - monotonic()),
         )
+        self.progress.end("verification_baseline", step_id=step_id)
         # Capture immediately before the browser action, after baseline completion.
         self.request = VerificationRequest(
             site=self.configuration.site.name, account=recipient, recipient=recipient,
@@ -43,9 +47,10 @@ class EmailChallenge:
             link_path_prefix=verification.link_path_prefix,
         )
 
-    async def receive(self) -> VerificationResult:
+    async def receive(self, *, step_id="verification_wait") -> VerificationResult:
         if self.request is None:
             raise ConfigurationError("OTP entry requires a prepared email challenge")
+        self.progress.start("verification_wait", step_id=step_id)
         result = await self.provider.receive(self.request)
         request = self.request
         # Enforce the contract even for injected providers, before entering any value.
@@ -62,13 +67,16 @@ class EmailChallenge:
         if not valid:
             raise VerificationError("verification_result_invalid")
         self.result = result
+        self.progress.end("verification_wait", step_id=step_id)
         return result
 
     async def acknowledge(self) -> None:
         policy = self.configuration.site.verification.acknowledge
         if self.result is not None and policy == "on_success":
+            self.progress.start("acknowledgment")
             await asyncio.wait_for(
                 self.provider.acknowledge(self.result, success=True, policy=policy,
                                           deadline=self.deadline),
                 max(0, self.deadline - monotonic()),
             )
+            self.progress.end("acknowledgment")

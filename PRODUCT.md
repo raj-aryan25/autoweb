@@ -11,7 +11,8 @@ web
 The existing framework is Python with Playwright, configured through the root
 pyproject.toml. The user selected a local web app and the Split workspace
 composition with a code-led implementation. The UI uses React, TypeScript, and
-Vite in apps/web/. Python API transport is a later integration milestone.
+Vite in apps/web/. The loopback Python API, worker and durable history are
+implemented; connecting the React runner is Step 6.
 
 ## Users
 
@@ -42,6 +43,9 @@ in one monorepo. Active framework code currently lives in src/autoweb/.
   must not start automatically.
 - The UI uses simulated runs. It does not launch Python, a browser, Gmail, or AI
   clients. History and settings reset on refresh.
+- The separate Linux backend supports real controlled password execution, safe
+  stop, SQLite history and event replay. It does not automatically rerun interrupted
+  work. See docs/STUDIO_API.md for the implemented boundary.
 
 ## Brand Commitments
 

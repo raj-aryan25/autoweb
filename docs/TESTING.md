@@ -1,9 +1,27 @@
 # Testing with AutoWeb
 
+Studio Steps 1–2 introduce pure Python/TypeScript transport contracts. See the
+[integration boundary and current baseline](STUDIO_INTEGRATION_CONTRACTS.md) for
+generation, fixture checks, and integration readiness. These checks do not start
+a real Studio run.
+
+Step 3's [optional progress observer](STUDIO_PROGRESS.md) adds buffer/lifecycle unit
+tests and controlled password, OTP, and magic-link event-ordering tests to the same
+deterministic suite. No live mailbox or API service is needed.
+
+Step 4's [supervised worker checks](STUDIO_WORKER.md) add real local process/browser
+lifecycle and fault-injection coverage on Linux. The desktop headed test is opt-in
+with `AUTOWEB_TEST_HEADED=1`; normal regression skips it and the five live tests.
+
+Step 5's [API/storage/recovery checks](STUDIO_API.md) include real TCP/SSE and API
+process-crash cases. Install both server and test extras for the full suite. Per the
+user's workflow, primary agents delegate test/build execution to the configured
+Deepseek coding Paseo subagent; all commands still use conda `autoweb`.
+
 Use conda `autoweb` for every command. From the repository root:
 
 ```sh
-conda run -n autoweb python -m pip install -e ".[test]"
+conda run -n autoweb python -m pip install -e ".[server,test]"
 conda run -n autoweb python -m playwright install chromium
 conda run -n autoweb python -m pytest -q
 ```

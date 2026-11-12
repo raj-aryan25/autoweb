@@ -191,6 +191,21 @@ def load_configuration(
     environment = load_environment(root, env_file, environ)
     settings = _load_settings(root, settings_file, environment)
     site = load_site_profile(site_file, project_root=root)
+    return configuration_from_models(site, settings, environment, project_root=root,
+                                     schema_only=schema_only)
+
+
+def configuration_from_models(
+    site: SiteProfile, settings: RuntimeSettings, environment: Mapping[str, str],
+    *, project_root: str | Path, schema_only: bool = False,
+) -> Configuration:
+    """Resolve a validated copy, including per-run overrides, without global mutation."""
+    root = get_project_root(project_root)
+    site = SiteProfile.model_validate(site.model_dump())
+    settings = RuntimeSettings.model_validate(settings.model_dump())
+    settings.gmail.credentials_file = resolve_path(settings.gmail.credentials_file, root)
+    settings.gmail.token_file = resolve_path(settings.gmail.token_file, root)
+    settings.artifacts_dir = resolve_path(settings.artifacts_dir, root)
     if site.verification is not None:
         timeout = site.verification.timeout_seconds or settings.timeouts.verification_seconds
         if timeout > settings.timeouts.login_seconds:

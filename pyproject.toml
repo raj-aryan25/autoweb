@@ -22,12 +22,14 @@ gmail = [
 ]
 # Gemini uses REST; retain the extra for existing install commands.
 ai = []
-test = ["pytest==7.4.3", "pytest-asyncio==0.21.1", "pytest-cov==4.1.0"]
+server = ["fastapi==0.162.0", "starlette==1.0.0", "uvicorn==0.54.0"]
+test = ["pytest==7.4.3", "pytest-asyncio==0.21.1", "pytest-cov==4.1.0", "httpx==0.28.1"]
 
 [project.scripts]
 autoweb-config = "autoweb.config.cli:main"
 autoweb-login = "autoweb.login.cli:main"
 autoweb-gmail = "autoweb.gmail.cli:main"
+autoweb-api = "autoweb_api.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

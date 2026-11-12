@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from contextlib import AsyncExitStack, asynccontextmanager
 from dataclasses import replace
 from time import monotonic
@@ -26,6 +27,7 @@ from .assertions import check_rejection, wait_for_authentication, watch_for_reje
 from .diagnostics import capture_failure
 from .errors import LoginError
 from .results import LoginResult, StepResult
+from .progress import Progress, ProgressObserver
 from .steps import execute_step
 from .verification import EmailChallenge
 
@@ -69,20 +71,77 @@ async def _guard_steps(operation, session: BrowserSession, configuration: Config
 
 
 async def run_login(session: BrowserSession, configuration: Configuration,
-                    verification_provider: VerificationProvider | None = None, *, ai_client=None) -> LoginResult:
+                    verification_provider: VerificationProvider | None = None, *, ai_client=None,
+                    observer: ProgressObserver | None = None) -> LoginResult:
     """Log in using an existing session. Its lifetime remains the caller's responsibility.
 
     A failure raises LoginError with a structured failed result. Success returns
     the same active session, ready for protected post-login work.
     """
-    validate_login(configuration)
-    if configuration.site.verification and verification_provider is None:
-        raise ConfigurationError("Email login requires a verification provider")
+    progress = Progress(observer, configuration.site)
+    return await _observe_login(session, configuration, verification_provider,
+                                ai_client=ai_client, progress=progress)
+
+
+async def _observe_login(session, configuration, verification_provider, *, ai_client, progress,
+                         preflight_observed=False):
+    try:
+        if not preflight_observed:
+            progress.start("preflight")
+        validate_login(configuration)
+        if configuration.site.verification and verification_provider is None:
+            raise ConfigurationError("Email login requires a verification provider")
+        if not preflight_observed:
+            progress.end("preflight")
+        result = await _execute_login(session, configuration, verification_provider,
+                                      ai_client=ai_client, progress=progress)
+    except asyncio.CancelledError:
+        progress.finish_open("cancelled")
+        progress.emit("login_outcome", "cancelled")
+        raise
+    except Exception as error:
+        status = "failed" if isinstance(error, (LoginError, ConfigurationError)) else "error"
+        progress.finish_open(status)
+        progress.emit("login_outcome", status)
+        raise
+    progress.emit("login_outcome", "succeeded")
+    return result
+
+
+async def _close_observed_stack(stack, progress, exception_info):
+    progress.start("cleanup")
+    try:
+        suppressed = await stack.__aexit__(*exception_info)
+    except asyncio.CancelledError:
+        progress.end("cleanup", "cancelled")
+        raise
+    except BaseException:
+        progress.end("cleanup", "error")
+        raise
+    progress.end("cleanup")
+    return suppressed
+
+
+@asynccontextmanager
+async def _observed_stack(progress):
+    """Pass the original exception into resource exits, as AsyncExitStack does."""
+    stack = AsyncExitStack()
+    try:
+        yield stack
+    except BaseException:
+        if not await _close_observed_stack(stack, progress, sys.exc_info()):
+            raise
+    else:
+        await _close_observed_stack(stack, progress, (None, None, None))
+
+
+async def _execute_login(session, configuration, verification_provider, *, ai_client, progress):
+    """Shared execution core; observation never owns a browser or provider."""
     started = monotonic()
     deadline = started + configuration.settings.timeouts.login_seconds
     completed: list[StepResult] = []
     stage = "navigation"
-    challenge = (EmailChallenge(configuration, verification_provider, deadline)
+    challenge = (EmailChallenge(configuration, verification_provider, deadline, progress=progress)
                  if configuration.site.verification else None)
     navigation_stack = AsyncExitStack()
     link_navigation = None
@@ -108,6 +167,8 @@ async def run_login(session: BrowserSession, configuration: Configuration,
         nonlocal stage, link_navigation
         for index, step in enumerate(configuration.site.steps, start=1):
             stage = f"step:{index}:{step.action}"
+            step_id = progress.step_id(index)
+            progress.start("step", step_id=step_id, phase_id="action", action=step.action, index=index)
             step_deadline = monotonic() + (step.timeout_ms or configuration.settings.timeouts.action_ms) / 1000
 
             def step_budget():
@@ -134,13 +195,13 @@ async def run_login(session: BrowserSession, configuration: Configuration,
             if isinstance(step, (RequestOTPStep, RequestMagicLinkStep)):
                 # Baseline must finish before the one non-idempotent request click.
                 action_budget = step_budget()
-                await asyncio.wait_for(challenge.prepare(), active_deadline() - monotonic())
+                await asyncio.wait_for(challenge.prepare(step_id=step_id), active_deadline() - monotonic())
                 step_deadline = monotonic() + action_budget / 1000
                 result = await click(session.page, step.target, timeout_ms=step_budget())
             elif isinstance(step, FollowMagicLinkStep):
                 from autoweb.browser.magic_link import MagicLinkNavigation
 
-                selected = await asyncio.wait_for(challenge.receive(), active_deadline() - monotonic())
+                selected = await asyncio.wait_for(challenge.receive(step_id=step_id), active_deadline() - monotonic())
                 link_navigation = await navigation_stack.enter_async_context(
                     MagicLinkNavigation(session.page, configuration.site.verification, active_deadline()))
                 try:
@@ -151,7 +212,7 @@ async def run_login(session: BrowserSession, configuration: Configuration,
                     raise
             elif isinstance(step, FillOTPStep):
                 action_budget = step_budget()
-                selected = await asyncio.wait_for(challenge.receive(), active_deadline() - monotonic())
+                selected = await asyncio.wait_for(challenge.receive(step_id=step_id), active_deadline() - monotonic())
                 step_deadline = monotonic() + action_budget / 1000
                 if resolver and step.ai_fallback and len(step.targets) == 1:
                     target = step.targets[0]
@@ -172,21 +233,26 @@ async def run_login(session: BrowserSession, configuration: Configuration,
                     step_budget(),
                 )
             completed.append(StepResult(index, step.action, result))
+            progress.end("step", result.status, step_id=step_id)
 
     async def workflow() -> None:
         nonlocal stage
         async with navigation_stack:
+            progress.start("navigation")
             await navigate(
                 session.page, configuration.site.entry_url,
                 timeout_ms=budget_ms(configuration.settings.timeouts.navigation_ms),
             )
+            progress.end("navigation")
             await _guard_steps(steps(), session, configuration, deadline)
             stage = "authentication"
+            progress.start("authentication")
             authentication = wait_for_authentication(session.page, configuration.site, active_deadline())
             if link_navigation:
                 await link_navigation.wait(authentication)
             else:
                 await authentication
+            progress.end("authentication")
             if challenge:
                 stage = "acknowledgment"
                 await challenge.acknowledge()
@@ -207,6 +273,7 @@ async def run_login(session: BrowserSession, configuration: Configuration,
             reason = "step_timeout"
         else:
             reason = error.reason
+        progress.finish_open("failed")
         artifacts = await capture_failure(
             session.page, configuration.site,
             resolve_path(configuration.settings.artifacts_dir, configuration.project_root),
@@ -225,23 +292,44 @@ async def run_login(session: BrowserSession, configuration: Configuration,
 @asynccontextmanager
 async def authenticated_session(
     configuration: Configuration, verification_provider: VerificationProvider | None = None,
-    *, ai_client=None,
+    *, ai_client=None, observer: ProgressObserver | None = None,
 ) -> AsyncIterator[LoginResult]:
     """Own a session, yield it only after proven authentication, and always clean up."""
-    validate_login(configuration)
-    if configuration.settings.ai.enabled and ai_client is None:
-        from autoweb.ai.client import client_from_configuration
+    progress = Progress(observer, configuration.site)
+    progress.start("preflight")
+    try:
+        validate_login(configuration)
+        if configuration.settings.ai.enabled and ai_client is None:
+            from autoweb.ai.client import client_from_configuration
 
-        ai_client = client_from_configuration(configuration)
-    async with AsyncExitStack() as stack:
-        if configuration.site.verification and verification_provider is None:
-            # Lazy application wiring. The core runner only knows the protocol.
-            from autoweb.gmail.provider import open_gmail_provider
+            ai_client = client_from_configuration(configuration)
+    except Exception as error:
+        status = "failed" if isinstance(error, ConfigurationError) else "error"
+        progress.finish_open(status)
+        progress.emit("login_outcome", status)
+        raise
+    async with _observed_stack(progress) as stack:
+        try:
+            if configuration.site.verification and verification_provider is None:
+                # Lazy application wiring. The core runner only knows the protocol.
+                from autoweb.gmail.provider import open_gmail_provider
 
-            options = {"ai_client": ai_client} if ai_client is not None else {}
-            verification_provider = await stack.enter_async_context(open_gmail_provider(configuration, **options))
-        session = await stack.enter_async_context(open_session(configuration.settings))
-        result = await run_login(session, configuration, verification_provider, ai_client=ai_client)
+                options = {"ai_client": ai_client} if ai_client is not None else {}
+                verification_provider = await stack.enter_async_context(open_gmail_provider(configuration, **options))
+            progress.end("preflight")
+            progress.start("browser_startup")
+            session = await stack.enter_async_context(open_session(configuration.settings))
+        except asyncio.CancelledError:
+            progress.finish_open("cancelled")
+            progress.emit("login_outcome", "cancelled")
+            raise
+        except Exception:
+            progress.finish_open("error")
+            progress.emit("login_outcome", "error")
+            raise
+        progress.end("browser_startup")
+        result = await _observe_login(session, configuration, verification_provider,
+                                      ai_client=ai_client, progress=progress, preflight_observed=True)
         usage = getattr(ai_client, "usage", None)
         if isinstance(usage, UsageSnapshot):
             result = replace(result, ai_usage=usage)

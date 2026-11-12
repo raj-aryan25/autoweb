@@ -11,10 +11,79 @@ from autoweb.config import load_configuration
 from autoweb.contracts import VerificationError, VerificationResult
 from autoweb.gmail import GmailVerificationProvider
 from autoweb.login import LoginError, authenticated_session, run_login
+from autoweb.login import ProgressObserver
+from tests.fixtures.progress import assert_boundaries, states
 from autoweb.browser import open_session
 from tests.fixtures.email_site import DEMO_CODE, message
 
 pytestmark = pytest.mark.asyncio
+
+
+@pytest.mark.parametrize("hang", [False, True])
+async def test_otp_observes_real_wait_and_preserves_one_request(email_site, email_configuration, hang):
+    configuration = email_configuration(timeout=0.8 if hang else 3)
+    provider = FakeProvider(email_site, hang=hang)
+    observer = ProgressObserver()
+    if hang:
+        with pytest.raises(LoginError) as failure:
+            async with authenticated_session(configuration, provider, observer=observer):
+                pytest.fail("Hanging verification must time out")
+        assert failure.value.result.reason == "verification_timeout"
+    else:
+        async with authenticated_session(configuration, provider, observer=observer) as result:
+            assert result.status == "succeeded"
+    events = observer.drain()
+    assert_boundaries(events, configuration)
+    assert states(events, "verification_baseline") == ["started", "succeeded"]
+    assert states(events, "verification_wait") == ["started", "failed" if hang else "succeeded"]
+    waiter = next(event for event in events if event.kind == "verification_wait")
+    consumer = next(event for event in events if event.kind == "step" and event.action == "fill_otp")
+    assert waiter.step_id == consumer.step_id
+    baseline = next(event for event in events if event.kind == "verification_baseline" and event.status == "succeeded")
+    request_end = next(event for event in events if event.kind == "step" and event.action == "request_otp" and event.status == "succeeded")
+    assert baseline.ordinal < request_end.ordinal < waiter.ordinal
+    assert email_site.request_count == provider.baseline_calls == 1
+    assert bool(provider.acknowledged) is not hang
+    assert DEMO_CODE not in repr(events)
+    assert "test@example" not in repr(events)
+    if not hang:
+        auth = next(event for event in events if event.kind == "authentication" and event.status == "succeeded")
+        ack = next(event for event in events if event.kind == "acknowledgment")
+        assert auth.ordinal < ack.ordinal
+
+
+async def test_cancellation_closes_observed_wait_and_owned_session(email_site, email_configuration):
+    observer = ProgressObserver()
+    configuration = email_configuration(timeout=3)
+    provider = FakeProvider(email_site, hang=True)
+
+    async def work():
+        async with authenticated_session(configuration, provider, observer=observer):
+            pytest.fail("Hanging login must not succeed")
+
+    task = asyncio.create_task(work())
+    events = []
+    try:
+        while True:
+            event = await asyncio.wait_for(observer.next_event(), 10)
+            events.append(event)
+            if event.kind == "verification_wait" and event.status == "started":
+                assert not task.done()
+                break
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+    finally:
+        if not task.done():
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+    events.extend(observer.drain())
+    assert_boundaries(events, configuration)
+    assert states(events, "verification_wait") == ["started", "cancelled"]
+    assert states(events, "login_outcome") == ["cancelled"]
+    assert states(events, "cleanup") == ["started", "succeeded"]
+    assert email_site.request_count == 1 and email_site.verify_count == 0
+    assert not provider.acknowledged
 
 
 class FakeProvider:

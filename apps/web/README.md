@@ -56,3 +56,18 @@ The UI-only simulation lives in `src/demo/`; it is separate from the rendering
 components. Replace that boundary with a local API/event transport in the next
 milestone, retaining login behavior in `src/autoweb/`. Headed execution will open
 its own browser window; this UI does not imply an embedded stream.
+
+Steps 1–2 of the integration plan now define generated transport types and shared
+fixtures in `src/transport/`. They are not connected to the demo runner yet. See
+[the contracts and baseline](../../docs/STUDIO_INTEGRATION_CONTRACTS.md) for the
+registry policy, event/replay semantics and generation commands.
+
+Step 4 now supplies [supervised package execution](../../docs/STUDIO_WORKER.md)
+on Linux, including a controlled headed password check. It is not wired to this
+UI yet; Start/Stop here still control the visibly labeled demo.
+
+Step 5 adds the [local API, history and SSE](../../docs/STUDIO_API.md). Start it in
+another terminal with `conda run -n autoweb autoweb-api --root .` after installing
+`.[server,test]`. Vite now stays on port 5173 and proxies `/api` to loopback port
+8766, preserving Host/Origin for the local request checks. The React runner itself
+remains simulated until Step 6.

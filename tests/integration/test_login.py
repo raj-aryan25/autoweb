@@ -13,6 +13,8 @@ from autoweb.browser import click, wait_for_state
 from autoweb.config import load_configuration
 from autoweb.config.models import Locator
 from autoweb.login import LoginError, authenticated_session, run_login
+from autoweb.login import ProgressObserver
+from tests.fixtures.progress import assert_boundaries, states
 from tests.fixtures.login_site import DEMO_PASSWORD, DEMO_USERNAME
 
 pytestmark = pytest.mark.asyncio
@@ -144,6 +146,65 @@ async def test_absent_optional_step_is_skipped(configuration_factory):
     async with authenticated_session(configuration) as result:
         assert result.steps[1].result.status == "skipped"
         assert result.steps[1].result.reason == "absent"
+
+
+@pytest.mark.parametrize("observer_mode", ["unconsumed", "disconnected", "broken"])
+async def test_password_observation_cannot_change_login(configuration_factory, monkeypatch, observer_mode):
+    observer = ProgressObserver()
+    if observer_mode == "disconnected":
+        observer.close()
+    elif observer_mode == "broken":
+        def broken(**kwargs):
+            raise RuntimeError("synthetic-private-observer-failure")
+        monkeypatch.setattr(observer, "_publish", broken)
+    configuration = configuration_factory(login_seconds=5)
+    async with authenticated_session(configuration, observer=observer) as result:
+        assert result.status == "succeeded"
+        assert await result.session.page.get_by_test_id("account-menu").is_visible()
+        active = result.session
+    assert active.page.is_closed()
+    if observer_mode == "unconsumed":
+        events = observer.drain()
+        assert_boundaries(events, configuration)
+        assert states(events, "preflight") == ["started", "succeeded"]
+        assert states(events, "browser_startup") == ["started", "succeeded"]
+        assert states(events, "navigation") == ["started", "succeeded"]
+        assert states(events, "authentication") == ["started", "succeeded"]
+        assert states(events, "cleanup") == ["started", "succeeded"]
+        assert not observer.overflowed
+        assert DEMO_PASSWORD not in repr(events) and DEMO_USERNAME not in repr(events)
+    else:
+        assert not observer.drain()
+
+
+async def test_observed_optional_skip_is_not_a_pass(configuration_factory):
+    def optional(profile):
+        profile["steps"].insert(1, {"action": "click", "target": {"by": "css", "value": "#optional"},
+                                     "optional": True, "timeout_ms": 100})
+    configuration = configuration_factory(change=optional, login_seconds=5)
+    observer = ProgressObserver()
+    async with authenticated_session(configuration, observer=observer) as result:
+        assert result.steps[1].result.status == "skipped"
+    events = observer.drain()
+    assert_boundaries(events, configuration)
+    assert [event.status for event in events if event.kind == "step" and event.index == 2] == ["started", "skipped"]
+
+
+async def test_observed_action_failure_is_closed_without_success(configuration_factory, session):
+    def missing(profile):
+        profile["steps"][1]["target"] = {"by": "css", "value": "#missing"}
+        profile["steps"][1]["timeout_ms"] = 200
+    configuration = configuration_factory(change=missing, login_seconds=5)
+    observer = ProgressObserver()
+    with pytest.raises(LoginError) as failure:
+        await run_login(session, configuration, observer=observer)
+    assert failure.value.result.reason == "step_timeout"
+    events = observer.drain()
+    assert_boundaries(events, configuration)
+    assert [event.status for event in events if event.kind == "step" and event.index == 2] == ["started", "failed"]
+    assert states(events, "login_outcome") == ["failed"]
+    assert not states(events, "cleanup")
+    assert not session.page.is_closed()
 
 
 async def test_ambiguous_failure_condition_reports_configuration_problem(configuration_factory):

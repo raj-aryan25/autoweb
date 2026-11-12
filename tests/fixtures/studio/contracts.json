@@ -1,0 +1,1064 @@
+[
+  {
+    "name": "success",
+    "connection": "connected",
+    "transport": {
+      "status": "replay",
+      "after_sequence": 0,
+      "snapshot": {
+        "schema_version": 1,
+        "run_id": "run-success",
+        "profile_id": "controlled-otp",
+        "state": "succeeded",
+        "cursor": 12,
+        "steps": [
+          {
+            "step_id": "action:otp:1",
+            "state": "succeeded"
+          },
+          {
+            "step_id": "action:submit:1",
+            "state": "succeeded"
+          }
+        ],
+        "outcome": {
+          "type": "final_outcome",
+          "state": "succeeded",
+          "authentication": "succeeded",
+          "diagnostic": null,
+          "ai_usage": {
+            "calls": 0,
+            "prompt_tokens": 0,
+            "candidate_tokens": 0,
+            "total_tokens": 0
+          }
+        }
+      },
+      "events": [
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 1,
+          "timestamp": "2026-11-06T12:00:01Z",
+          "elapsed_seconds": 1.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "started"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 2,
+          "timestamp": "2026-11-06T12:00:02Z",
+          "elapsed_seconds": 2.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "ready"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 3,
+          "timestamp": "2026-11-06T12:00:03Z",
+          "elapsed_seconds": 3.0,
+          "step_id": "browser_startup",
+          "phase_id": "browser_startup",
+          "payload": {
+            "type": "browser_startup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 4,
+          "timestamp": "2026-11-06T12:00:04Z",
+          "elapsed_seconds": 4.0,
+          "step_id": "navigation",
+          "phase_id": "navigation",
+          "payload": {
+            "type": "navigation",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 5,
+          "timestamp": "2026-11-06T12:00:05Z",
+          "elapsed_seconds": 5.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "run_state_changed",
+            "state": "running"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 6,
+          "timestamp": "2026-11-06T12:00:06Z",
+          "elapsed_seconds": 6.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_started",
+            "action": "fill_otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 7,
+          "timestamp": "2026-11-06T12:00:07Z",
+          "elapsed_seconds": 7.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "started",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 8,
+          "timestamp": "2026-11-06T12:00:08Z",
+          "elapsed_seconds": 8.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "received",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 9,
+          "timestamp": "2026-11-06T12:00:09Z",
+          "elapsed_seconds": 9.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_completed",
+            "action": "fill_otp",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 10,
+          "timestamp": "2026-11-06T12:00:10Z",
+          "elapsed_seconds": 10.0,
+          "step_id": "authentication",
+          "phase_id": "authentication",
+          "payload": {
+            "type": "authentication",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 11,
+          "timestamp": "2026-11-06T12:00:11Z",
+          "elapsed_seconds": 11.0,
+          "step_id": "cleanup",
+          "phase_id": "cleanup",
+          "payload": {
+            "type": "cleanup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-success",
+          "sequence": 12,
+          "timestamp": "2026-11-06T12:00:12Z",
+          "elapsed_seconds": 12.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "final_outcome",
+            "state": "succeeded",
+            "authentication": "succeeded",
+            "diagnostic": null,
+            "ai_usage": {
+              "calls": 0,
+              "prompt_tokens": 0,
+              "candidate_tokens": 0,
+              "total_tokens": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "skip",
+    "connection": "connected",
+    "transport": {
+      "status": "replay",
+      "after_sequence": 0,
+      "snapshot": {
+        "schema_version": 1,
+        "run_id": "run-skip",
+        "profile_id": "controlled-otp",
+        "state": "succeeded",
+        "cursor": 14,
+        "steps": [
+          {
+            "step_id": "action:cookies:1",
+            "state": "skipped",
+            "diagnostic": "optional_target_absent"
+          },
+          {
+            "step_id": "action:otp:1",
+            "state": "succeeded"
+          },
+          {
+            "step_id": "action:submit:1",
+            "state": "succeeded"
+          }
+        ],
+        "outcome": {
+          "type": "final_outcome",
+          "state": "succeeded",
+          "authentication": "succeeded",
+          "diagnostic": null,
+          "ai_usage": {
+            "calls": 0,
+            "prompt_tokens": 0,
+            "candidate_tokens": 0,
+            "total_tokens": 0
+          }
+        }
+      },
+      "events": [
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 1,
+          "timestamp": "2026-11-06T12:00:01Z",
+          "elapsed_seconds": 1.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "started"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 2,
+          "timestamp": "2026-11-06T12:00:02Z",
+          "elapsed_seconds": 2.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "ready"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 3,
+          "timestamp": "2026-11-06T12:00:03Z",
+          "elapsed_seconds": 3.0,
+          "step_id": "browser_startup",
+          "phase_id": "browser_startup",
+          "payload": {
+            "type": "browser_startup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 4,
+          "timestamp": "2026-11-06T12:00:04Z",
+          "elapsed_seconds": 4.0,
+          "step_id": "navigation",
+          "phase_id": "navigation",
+          "payload": {
+            "type": "navigation",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 5,
+          "timestamp": "2026-11-06T12:00:05Z",
+          "elapsed_seconds": 5.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "run_state_changed",
+            "state": "running"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 6,
+          "timestamp": "2026-11-06T12:00:06Z",
+          "elapsed_seconds": 6.0,
+          "step_id": "action:cookies:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_started",
+            "action": "accept_cookies"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 7,
+          "timestamp": "2026-11-06T12:00:07Z",
+          "elapsed_seconds": 7.0,
+          "step_id": "action:cookies:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_completed",
+            "action": "accept_cookies",
+            "status": "skipped",
+            "diagnostic": "optional_target_absent"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 8,
+          "timestamp": "2026-11-06T12:00:08Z",
+          "elapsed_seconds": 8.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_started",
+            "action": "fill_otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 9,
+          "timestamp": "2026-11-06T12:00:09Z",
+          "elapsed_seconds": 9.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "started",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 10,
+          "timestamp": "2026-11-06T12:00:10Z",
+          "elapsed_seconds": 10.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "received",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 11,
+          "timestamp": "2026-11-06T12:00:11Z",
+          "elapsed_seconds": 11.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_completed",
+            "action": "fill_otp",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 12,
+          "timestamp": "2026-11-06T12:00:12Z",
+          "elapsed_seconds": 12.0,
+          "step_id": "authentication",
+          "phase_id": "authentication",
+          "payload": {
+            "type": "authentication",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 13,
+          "timestamp": "2026-11-06T12:00:13Z",
+          "elapsed_seconds": 13.0,
+          "step_id": "cleanup",
+          "phase_id": "cleanup",
+          "payload": {
+            "type": "cleanup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-skip",
+          "sequence": 14,
+          "timestamp": "2026-11-06T12:00:14Z",
+          "elapsed_seconds": 14.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "final_outcome",
+            "state": "succeeded",
+            "authentication": "succeeded",
+            "diagnostic": null,
+            "ai_usage": {
+              "calls": 0,
+              "prompt_tokens": 0,
+              "candidate_tokens": 0,
+              "total_tokens": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "timeout",
+    "connection": "connected",
+    "transport": {
+      "status": "replay",
+      "after_sequence": 0,
+      "snapshot": {
+        "schema_version": 1,
+        "run_id": "run-timeout",
+        "profile_id": "controlled-otp",
+        "state": "failed",
+        "cursor": 12,
+        "steps": [
+          {
+            "step_id": "action:otp:1",
+            "state": "failed"
+          },
+          {
+            "step_id": "action:submit:1",
+            "state": "not_executed"
+          }
+        ],
+        "outcome": {
+          "type": "final_outcome",
+          "state": "failed",
+          "authentication": "failed",
+          "diagnostic": "verification_timeout",
+          "ai_usage": null
+        }
+      },
+      "events": [
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 1,
+          "timestamp": "2026-11-06T12:00:01Z",
+          "elapsed_seconds": 1.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "started"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 2,
+          "timestamp": "2026-11-06T12:00:02Z",
+          "elapsed_seconds": 2.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "ready"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 3,
+          "timestamp": "2026-11-06T12:00:03Z",
+          "elapsed_seconds": 3.0,
+          "step_id": "browser_startup",
+          "phase_id": "browser_startup",
+          "payload": {
+            "type": "browser_startup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 4,
+          "timestamp": "2026-11-06T12:00:04Z",
+          "elapsed_seconds": 4.0,
+          "step_id": "navigation",
+          "phase_id": "navigation",
+          "payload": {
+            "type": "navigation",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 5,
+          "timestamp": "2026-11-06T12:00:05Z",
+          "elapsed_seconds": 5.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "run_state_changed",
+            "state": "running"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 6,
+          "timestamp": "2026-11-06T12:00:06Z",
+          "elapsed_seconds": 6.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_started",
+            "action": "fill_otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 7,
+          "timestamp": "2026-11-06T12:00:07Z",
+          "elapsed_seconds": 7.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "started",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 8,
+          "timestamp": "2026-11-06T12:00:08Z",
+          "elapsed_seconds": 8.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "failed",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 9,
+          "timestamp": "2026-11-06T12:00:09Z",
+          "elapsed_seconds": 9.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_completed",
+            "action": "fill_otp",
+            "status": "failed"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 10,
+          "timestamp": "2026-11-06T12:00:10Z",
+          "elapsed_seconds": 10.0,
+          "step_id": "action:otp:1",
+          "phase_id": "diagnostics",
+          "payload": {
+            "type": "artifact_registered",
+            "artifact_id": "artifact-1",
+            "kind": "masked_screenshot"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 11,
+          "timestamp": "2026-11-06T12:00:11Z",
+          "elapsed_seconds": 11.0,
+          "step_id": "cleanup",
+          "phase_id": "cleanup",
+          "payload": {
+            "type": "cleanup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-timeout",
+          "sequence": 12,
+          "timestamp": "2026-11-06T12:00:12Z",
+          "elapsed_seconds": 12.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "final_outcome",
+            "state": "failed",
+            "authentication": "failed",
+            "diagnostic": "verification_timeout",
+            "ai_usage": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "cancellation",
+    "connection": "connected",
+    "transport": {
+      "status": "replay",
+      "after_sequence": 0,
+      "snapshot": {
+        "schema_version": 1,
+        "run_id": "run-cancellation",
+        "profile_id": "controlled-otp",
+        "state": "cancelled",
+        "cursor": 12,
+        "steps": [
+          {
+            "step_id": "action:otp:1",
+            "state": "cancelled"
+          },
+          {
+            "step_id": "action:submit:1",
+            "state": "not_executed"
+          }
+        ],
+        "outcome": {
+          "type": "final_outcome",
+          "state": "cancelled",
+          "authentication": "not_observed",
+          "diagnostic": "user_stop",
+          "ai_usage": null
+        }
+      },
+      "events": [
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 1,
+          "timestamp": "2026-11-06T12:00:01Z",
+          "elapsed_seconds": 1.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "started"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 2,
+          "timestamp": "2026-11-06T12:00:02Z",
+          "elapsed_seconds": 2.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "ready"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 3,
+          "timestamp": "2026-11-06T12:00:03Z",
+          "elapsed_seconds": 3.0,
+          "step_id": "browser_startup",
+          "phase_id": "browser_startup",
+          "payload": {
+            "type": "browser_startup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 4,
+          "timestamp": "2026-11-06T12:00:04Z",
+          "elapsed_seconds": 4.0,
+          "step_id": "navigation",
+          "phase_id": "navigation",
+          "payload": {
+            "type": "navigation",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 5,
+          "timestamp": "2026-11-06T12:00:05Z",
+          "elapsed_seconds": 5.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "run_state_changed",
+            "state": "running"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 6,
+          "timestamp": "2026-11-06T12:00:06Z",
+          "elapsed_seconds": 6.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_started",
+            "action": "fill_otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 7,
+          "timestamp": "2026-11-06T12:00:07Z",
+          "elapsed_seconds": 7.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "started",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 8,
+          "timestamp": "2026-11-06T12:00:08Z",
+          "elapsed_seconds": 8.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "run_state_changed",
+            "state": "stopping"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 9,
+          "timestamp": "2026-11-06T12:00:09Z",
+          "elapsed_seconds": 9.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "cancelled",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 10,
+          "timestamp": "2026-11-06T12:00:10Z",
+          "elapsed_seconds": 10.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_completed",
+            "action": "fill_otp",
+            "status": "cancelled"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 11,
+          "timestamp": "2026-11-06T12:00:11Z",
+          "elapsed_seconds": 11.0,
+          "step_id": "cleanup",
+          "phase_id": "cleanup",
+          "payload": {
+            "type": "cleanup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-cancellation",
+          "sequence": 12,
+          "timestamp": "2026-11-06T12:00:12Z",
+          "elapsed_seconds": 12.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "final_outcome",
+            "state": "cancelled",
+            "authentication": "not_observed",
+            "diagnostic": "user_stop",
+            "ai_usage": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "reconnect",
+    "connection": "reconnecting",
+    "transport": {
+      "status": "replay",
+      "after_sequence": 5,
+      "snapshot": {
+        "schema_version": 1,
+        "run_id": "run-reconnect",
+        "profile_id": "controlled-otp",
+        "state": "running",
+        "cursor": 7,
+        "steps": [
+          {
+            "step_id": "action:otp:1",
+            "state": "waiting"
+          },
+          {
+            "step_id": "action:submit:1",
+            "state": "not_executed"
+          }
+        ],
+        "outcome": null
+      },
+      "events": [
+        {
+          "schema_version": 1,
+          "run_id": "run-reconnect",
+          "sequence": 6,
+          "timestamp": "2026-11-06T12:00:06Z",
+          "elapsed_seconds": 6.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_started",
+            "action": "fill_otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-reconnect",
+          "sequence": 7,
+          "timestamp": "2026-11-06T12:00:07Z",
+          "elapsed_seconds": 7.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "started",
+            "kind": "otp"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "resync",
+    "connection": "reconnecting",
+    "transport": {
+      "status": "resync_required",
+      "after_sequence": 0,
+      "snapshot": {
+        "schema_version": 1,
+        "run_id": "run-resync",
+        "profile_id": "controlled-otp",
+        "state": "running",
+        "cursor": 7,
+        "steps": [
+          {
+            "step_id": "action:otp:1",
+            "state": "waiting"
+          },
+          {
+            "step_id": "action:submit:1",
+            "state": "not_executed"
+          }
+        ],
+        "outcome": null
+      },
+      "events": []
+    }
+  },
+  {
+    "name": "interruption",
+    "connection": "disconnected",
+    "transport": {
+      "status": "replay",
+      "after_sequence": 0,
+      "snapshot": {
+        "schema_version": 1,
+        "run_id": "run-interruption",
+        "profile_id": "controlled-otp",
+        "state": "interrupted",
+        "cursor": 8,
+        "steps": [
+          {
+            "step_id": "action:otp:1",
+            "state": "waiting"
+          },
+          {
+            "step_id": "action:submit:1",
+            "state": "not_executed"
+          }
+        ],
+        "outcome": {
+          "type": "final_outcome",
+          "state": "interrupted",
+          "authentication": "not_observed",
+          "diagnostic": "service_restart",
+          "ai_usage": null
+        }
+      },
+      "events": [
+        {
+          "schema_version": 1,
+          "run_id": "run-interruption",
+          "sequence": 1,
+          "timestamp": "2026-11-06T12:00:01Z",
+          "elapsed_seconds": 1.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "started"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-interruption",
+          "sequence": 2,
+          "timestamp": "2026-11-06T12:00:02Z",
+          "elapsed_seconds": 2.0,
+          "step_id": "preflight",
+          "phase_id": "preflight",
+          "payload": {
+            "type": "preflight",
+            "status": "ready"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-interruption",
+          "sequence": 3,
+          "timestamp": "2026-11-06T12:00:03Z",
+          "elapsed_seconds": 3.0,
+          "step_id": "browser_startup",
+          "phase_id": "browser_startup",
+          "payload": {
+            "type": "browser_startup",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-interruption",
+          "sequence": 4,
+          "timestamp": "2026-11-06T12:00:04Z",
+          "elapsed_seconds": 4.0,
+          "step_id": "navigation",
+          "phase_id": "navigation",
+          "payload": {
+            "type": "navigation",
+            "status": "succeeded"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-interruption",
+          "sequence": 5,
+          "timestamp": "2026-11-06T12:00:05Z",
+          "elapsed_seconds": 5.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "run_state_changed",
+            "state": "running"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-interruption",
+          "sequence": 6,
+          "timestamp": "2026-11-06T12:00:06Z",
+          "elapsed_seconds": 6.0,
+          "step_id": "action:otp:1",
+          "phase_id": "action",
+          "payload": {
+            "type": "step_started",
+            "action": "fill_otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-interruption",
+          "sequence": 7,
+          "timestamp": "2026-11-06T12:00:07Z",
+          "elapsed_seconds": 7.0,
+          "step_id": "action:otp:1",
+          "phase_id": "verification_wait",
+          "payload": {
+            "type": "verification_wait",
+            "status": "started",
+            "kind": "otp"
+          }
+        },
+        {
+          "schema_version": 1,
+          "run_id": "run-interruption",
+          "sequence": 8,
+          "timestamp": "2026-11-06T12:00:08Z",
+          "elapsed_seconds": 8.0,
+          "step_id": "outcome",
+          "phase_id": "outcome",
+          "payload": {
+            "type": "final_outcome",
+            "state": "interrupted",
+            "authentication": "not_observed",
+            "diagnostic": "service_restart",
+            "ai_usage": null
+          }
+        }
+      ]
+    }
+  }
+]
