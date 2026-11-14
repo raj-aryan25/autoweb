@@ -128,6 +128,15 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(404, "Not found")
 
     def do_POST(self):
+        if urlsplit(self.path).path == "/logout":
+            cookie = SimpleCookie(self.headers.get("Cookie", "")).get("autoweb_test_session")
+            with self.server.lock:
+                if cookie:
+                    self.server.sessions.discard(cookie.value)
+            self.respond_json(200, {"authenticated": False}, headers=[
+                ("Set-Cookie", "autoweb_test_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax"),
+            ])
+            return
         if urlsplit(self.path).path != "/session":
             self.respond(404, "Not found")
             return

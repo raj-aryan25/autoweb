@@ -3,7 +3,7 @@ import asyncio
 import json
 import os
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from playwright.async_api import async_playwright, expect
 
@@ -12,6 +12,8 @@ OUTPUT = ROOT / '.impeccable' / 'review' / 'studio'
 URL = os.environ.get('AUTOWEB_UI_URL', 'http://127.0.0.1:5173/')
 if urlparse(URL).hostname not in {'127.0.0.1', 'localhost', '::1'}:
     raise ValueError('UI verification must target a loopback server.')
+parts = urlparse(URL)
+URL = urlunparse(parts._replace(query=urlencode({**dict(parse_qsl(parts.query)), 'mode': 'demo'})))
 
 
 async def capture(page, filename):

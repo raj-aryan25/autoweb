@@ -30,8 +30,6 @@ class ProfileUnavailable(ConfigurationError):
 def prepare_run(request: StartRun, root: Path, run_directory: Path) -> PreparedRun:
     """Called in the executor, before a website, provider or browser is started."""
     registration = resolve_registration(request.profile_id)
-    if registration.id in {"controlled-otp", "controlled-magic-link"}:
-        raise ProfileUnavailable("Controlled verification fixtures are not available yet")
     controlled = registration.classification == "controlled"
     if controlled and request.overrides.ai_enabled:
         raise ConfigurationError("Controlled runs do not enable external AI")
@@ -45,17 +43,22 @@ def prepare_run(request: StartRun, root: Path, run_directory: Path) -> PreparedR
         "AUTOWEB_LOGIN_TIMEOUT_SECONDS": str(overrides.login_timeout_seconds),
         "AUTOWEB_VERIFICATION_TIMEOUT_SECONDS": str(overrides.verification_timeout_seconds),
     })
-    source = "configs/sites/local-password.example.json" if controlled else registration.source
-    site = load_site_profile(source, project_root=root)
+    site = registered_site(registration, root)
+    if bool(site.verification) != (registration.provider in {"gmail", "in_memory"}):
+        raise ConfigurationError("Profile verification does not match its registered provider")
     if len(site.steps) > MAX_STEPS:
         raise ConfigurationError("Profile exceeds the worker action limit")
     data = site.model_dump()
     if controlled:
         from autoweb.testing.password_site import DEMO_PASSWORD, DEMO_USERNAME
 
-        environment.update(LOCAL_LOGIN_USERNAME=DEMO_USERNAME, LOCAL_LOGIN_PASSWORD=DEMO_PASSWORD)
+        from autoweb.testing.studio import DEMO_EMAIL
+
+        environment.update(LOCAL_LOGIN_USERNAME=DEMO_USERNAME, LOCAL_LOGIN_PASSWORD=DEMO_PASSWORD,
+                           LOCAL_VERIFICATION_EMAIL=DEMO_EMAIL)
         # The actual ephemeral fixture address is bound after preflight succeeds.
-        data["entry_url"] = "http://127.0.0.1:1/login"
+        if registration.provider == "none":
+            data["entry_url"] = "http://127.0.0.1:1/login"
     if data["verification"]:
         data["verification"]["timeout_seconds"] = float(overrides.verification_timeout_seconds)
     site = SiteProfile.model_validate(data)
@@ -65,6 +68,11 @@ def prepare_run(request: StartRun, root: Path, run_directory: Path) -> PreparedR
     values["timeouts"]["action_ms"] = min(settings.timeouts.action_ms, 10000)
     values["timeouts"]["navigation_ms"] = min(settings.timeouts.navigation_ms, 30000)
     values["gmail"]["request_timeout_seconds"] = min(settings.gmail.request_timeout_seconds, 30)
+    if registration.provider == "in_memory":
+        # Generic configuration validates this interval even for injected providers.
+        # Keep that invariant without changing the approved Gmail profile's policy.
+        values["gmail"]["poll_interval_seconds"] = min(settings.gmail.poll_interval_seconds,
+                                                       overrides.verification_timeout_seconds / 2)
     values["ai"]["request_timeout_seconds"] = min(settings.ai.request_timeout_seconds, 10)
     values["artifacts_dir"] = run_directory
     settings = RuntimeSettings.model_validate(values)
@@ -75,15 +83,32 @@ def prepare_run(request: StartRun, root: Path, run_directory: Path) -> PreparedR
     return PreparedRun(configuration, registration)
 
 
+def registered_site(registration: Registration, root: Path) -> SiteProfile:
+    if registration.provider == "in_memory":
+        from autoweb.testing.studio import verification_profile
+
+        return verification_profile(registration.id)
+    source = "configs/sites/local-password.example.json" if registration.classification == "controlled" else registration.source
+    return load_site_profile(source, project_root=root)
+
+
 @contextmanager
 def controlled_site(prepared: PreparedRun):
     """Own the loopback fixture; production never imports the tests package."""
     if prepared.registration.classification != "controlled":
-        yield prepared.configuration
+        yield prepared.configuration, None
         return
-    from autoweb.testing.password_site import make_server
+    if prepared.registration.provider == "in_memory":
+        from autoweb.testing.email_site import EmailSite
+        from autoweb.testing.magic_site import MagicSite
+        from autoweb.testing.studio import FixtureVerificationProvider
 
-    server = make_server()
+        server = MagicSite() if prepared.registration.id == "controlled-magic-link" else EmailSite()
+        server.verification_provider = FixtureVerificationProvider()
+    else:
+        from autoweb.testing.password_site import make_server
+
+        server = make_server()
     server.daemon_threads = True
     thread = Thread(target=server.serve_forever, daemon=True)
     started = False
@@ -92,10 +117,19 @@ def controlled_site(prepared: PreparedRun):
         started = True
         source = prepared.configuration
         data = source.site.model_dump()
-        data["entry_url"] = f"http://127.0.0.1:{server.server_port}/login"
+        origin = f"http://127.0.0.1:{server.server_port}"
+        if prepared.registration.provider == "in_memory":
+            from autoweb.testing.studio import verification_profile
+
+            fixture = verification_profile(prepared.registration.id, origin)
+            data["entry_url"] = fixture.entry_url
+            if fixture.verification.kind == "magic_link":
+                data["verification"]["allowed_origins"] = [origin]
+        else:
+            data["entry_url"] = origin + "/login"
         site = SiteProfile.model_validate(data)
         # Credential references and settings are unchanged by the ephemeral bind.
-        yield Configuration(source.project_root, source.settings, site, source.secrets)
+        yield Configuration(source.project_root, source.settings, site, source.secrets), getattr(server, "verification_provider", None)
     finally:
         if started:
             server.shutdown()

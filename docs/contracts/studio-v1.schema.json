@@ -37,6 +37,42 @@
       "title": "AIUsage",
       "type": "object"
     },
+    "ArtifactDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "artifact_registered",
+          "title": "Type",
+          "type": "string"
+        },
+        "artifact_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "masked_screenshot",
+            "sanitized_report"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "step_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Step Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "artifact_id",
+        "kind",
+        "step_id"
+      ],
+      "title": "ArtifactDescriptor",
+      "type": "object"
+    },
     "ArtifactRegistered": {
       "additionalProperties": false,
       "properties": {
@@ -882,6 +918,14 @@
           ],
           "title": "Authentication",
           "type": "string"
+        },
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/ArtifactDescriptor"
+          },
+          "maxItems": 16,
+          "title": "Artifacts",
+          "type": "array"
         }
       },
       "required": [

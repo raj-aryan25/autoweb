@@ -16,6 +16,7 @@ from autoweb.login import LoginError, ProgressObserver, authenticated_session
 
 from .configuration import ProfileUnavailable, controlled_site, prepare_run
 from .contracts import AIUsage, FinalOutcome
+from .evidence import publish_evidence
 from .profiles import display_steps
 from .protocol import (
     MAX_LINE, MAX_OUTPUT, EffectiveSettings, EventClock, ExecutorResult, Launch, Manifest, Stop, encode,
@@ -78,8 +79,6 @@ class ExecutionEvents:
                     "diagnostic": "optional_target_absent" if status == "skipped" else None,
                 }
             elif event.kind == "verification_wait":
-                # Verification profiles are not enabled in the application harness yet.
-                # This path is shared with the approved Gmail registration.
                 payload["kind"] = self.verification_kind
                 payload["status"] = "received" if status == "succeeded" else status
             if event.kind == "authentication":
@@ -120,6 +119,8 @@ def diagnostic(error):
 
 async def execute(launch, root, artifacts, events, observer):
     usage = None
+    prepared = directory = failure = None
+    state, code = "failed", "worker_failed"
     try:
         try:
             prepared = prepare_run(launch.request, root, artifacts / launch.run_id)
@@ -141,18 +142,25 @@ async def execute(launch, root, artifacts, events, observer):
         directory.mkdir(parents=True, exist_ok=False, mode=0o700)
         events.emit({"type": "preflight", "status": "ready"}, step_id="preflight", phase_id="preflight")
         events.preflight_ready = True
-        with controlled_site(prepared) as configuration:
-            async with authenticated_session(configuration, observer=observer) as result:
+        with controlled_site(prepared) as (configuration, provider):
+            async with authenticated_session(configuration, provider, observer=observer) as result:
                 if result.ai_usage is not None:
                     usage = AIUsage(**asdict(result.ai_usage))
-        return "succeeded", None, usage
+        state, code = "succeeded", None
     except asyncio.CancelledError:
-        return "cancelled", "user_stop", usage
+        state, code = "cancelled", "user_stop"
     except Exception as error:
+        if isinstance(error, LoginError):
+            failure = error.result
+            if failure.ai_usage is not None:
+                usage = AIUsage(**asdict(failure.ai_usage))
         code = diagnostic(error)
         if code == "authentication_rejected" and events.authentication != "succeeded":
             events.authentication = "failed"
-        return "failed", code, usage
+    events.observe(observer)
+    if prepared is not None and directory is not None:
+        publish_evidence(directory, events, prepared, state, code, usage, failure)
+    return state, code, usage
 
 
 async def run(root: Path, artifacts: Path, epoch: float, output_fd: int):

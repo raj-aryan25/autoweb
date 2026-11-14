@@ -35,7 +35,7 @@ async def test_factory_defers_lifecycle_and_health_profiles_do_not_create_client
         assert result.status_code == 200
         profiles = result.json()
         assert len(profiles) == 5
-        assert next(item for item in profiles if item["id"] == "controlled-otp")["readiness"] == "unavailable"
+        assert next(item for item in profiles if item["id"] == "controlled-otp")["readiness"] == "unverified"
         assert service.coordinator.active is None and not service.tasks
 
 
@@ -46,8 +46,8 @@ async def test_preflight_is_nonexecuting_and_external_services_stay_unverified(t
         assert result.status_code == 200 and result.json()["status"] == "ready"
         assert result.json()["external_services"] == "unverified"
         assert result.json()["manifest"]["effective"]["browser"]["headless"] is False
-        unavailable = await client.post("/api/preflight", json={"profile_id": "controlled-magic-link"})
-        assert unavailable.json()["status"] == "unavailable"
+        verification = await client.post("/api/preflight", json={"profile_id": "controlled-magic-link"})
+        assert verification.json()["status"] == "ready"
         assert service.store.page().total == 0 and service.coordinator.active is None
         assert not (tmp_path / "run-artifacts").exists()
 

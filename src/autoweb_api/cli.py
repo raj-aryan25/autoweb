@@ -1,4 +1,4 @@
-"""Development/local API launcher. The full Studio launcher belongs to Step 8."""
+"""Development/API launcher; use autoweb-studio for the built local application."""
 
 import argparse
 from pathlib import Path

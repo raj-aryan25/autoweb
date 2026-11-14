@@ -2,8 +2,9 @@
 
 Step 5 connects the supervised worker to a loopback FastAPI service and SQLite
 history. The backend runs real controlled password logins and preserves records
-across refresh/restart. The React workspace is still visibly simulated; connecting
-its runner is Step 6. This does not complete Gate A or Phase VII live validation.
+across refresh/restart. The React workspace now connects to it through
+[Step 6](STUDIO_UI.md), completing Gate A through
+controlled headed UI acceptance. Phase VII live validation remains separate.
 
 The current service/worker execution path supports Linux. Windows/macOS require
 equivalent process containment. No live websites, Gmail/OAuth or framework AI calls
@@ -211,3 +212,10 @@ Verified on 2026-11-06 by the configured Deepseek coding subagent:
 The six skips remain five live tests plus the opt-in desktop headed test. Step 5
 adds 43 deterministic cases over the 454-pass Step 4 baseline. All project test
 and build execution was delegated; the test subagent made no implementation edits.
+
+
+Step 7 adds an optional `artifacts` inventory to `RunRecord`, containing only
+producer-approved artifact IDs, kinds and stable step IDs. Registration, inventory
+and the observation event are committed together, so Evidence can survive replay
+retention loss. Existing rows default to an empty inventory without a database
+schema migration. See [the evidence producer and privacy boundary](STUDIO_VERIFICATION.md).

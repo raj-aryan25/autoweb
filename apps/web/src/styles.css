@@ -339,3 +339,33 @@ input:invalid:not(:placeholder-shown) { border-color: var(--danger); }
   .evidence-record > .section-line { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none!important; animation: none!important; scroll-behavior: auto!important; } }
+
+/* Local runner uses the selected Split workspace surfaces and status palette. */
+.mode-switch { white-space: nowrap; }
+.local-app .run-id { overflow-wrap: anywhere; }
+.local-app .run-subtitle { flex-wrap: wrap; }
+.local-app .connection-notice { align-items: center; }
+.local-app .connection-notice > div { min-width: 0; flex: 1; }
+.local-app .connection-notice h2 { font-size: 15px; }
+.local-app .connection-notice p { max-width: 75ch; }
+.local-app .active-notice { margin: 20px 32px; }
+.local-app .run-metadata .status-badge { margin-left: auto; }
+.live-notice { color: var(--amber); font-size: 13px; line-height: 1.65; max-width: 75ch; }
+.ai-setting { margin-top: 22px; }
+.pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 24px; color: var(--muted); font-size: 12px; }
+.local-app .history-table { min-width: 700px; }
+.local-app .history-table td:first-child { max-width: 260px; overflow-wrap: anywhere; }
+.local-app .events-table small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+.status-badge.skipped, .status-badge.not_executed, .status-badge.interrupted, .status-badge.created { color: var(--muted); background: var(--field); }
+.status-badge.preflight, .status-badge.stopping { color: var(--amber); background: var(--amber-surface); }
+.step.skipped .step-icon, .step.not_executed .step-icon { color: var(--muted); border-style: dashed; }
+.local-app .step-support .text-button { margin-top: 16px; }
+@media (max-width: 740px) {
+  .local-app .topbar { flex-wrap: wrap; gap: 10px; padding-top: 16px; padding-bottom: 16px; }
+  .local-app .topbar .demo-badge { margin-left: 0; }
+  .local-app .connection-notice { flex-wrap: wrap; }
+  .local-app .connection-notice > div { flex-basis: calc(100% - 40px); }
+  .local-app .connection-notice > .button { margin-left: 28px; }
+  .local-app .active-notice { margin: 18px; }
+  .local-app .run-metadata .status-badge { margin-left: 0; }
+}

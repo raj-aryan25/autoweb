@@ -1,6 +1,6 @@
 # Next milestone: real AutoWeb runs in the local UI
 
-Status: **Steps 1–5 implemented on 2026-11-06; real UI runner integration starts at Step 6.**
+Status: **Steps 1–8 implemented and verified on 2026-11-12. Gates A, B and C delivered. Controlled local integration milestone complete; Phase VII live validation remains separate.**
 
 Prepared: 2026-11-05.
 
@@ -12,6 +12,9 @@ The subsequent instruction authorized Step 3, now covered by
 Step 4 was subsequently authorized; see [supervised package execution](STUDIO_WORKER.md)
 for the worker lifecycle, Linux containment boundary and controlled verification.
 Step 5 was subsequently authorized; see [the local API and durable run journal](STUDIO_API.md).
+Step 6 was subsequently authorized; see [real Studio execution and controlled UI acceptance](STUDIO_UI.md).
+Step 7 was subsequently authorized; see [controlled verification and sanitized evidence](STUDIO_VERIFICATION.md).
+Step 8 was subsequently authorized; see [local launch and final acceptance](STUDIO_ACCEPTANCE.md).
 
 ## Implementation starting points — TL;DR
 
@@ -34,7 +37,8 @@ First delivery target: one controlled headed password login with real events,
 safe cancellation, and saved results. Add controlled OTP/magic-link coverage next.
 The backend contains contracts, registry policy, supervised worker execution,
 loopback HTTP/SSE, durable history and recovery. The login package supports progress
-observation. The React runner is still simulated; Step 6 connects real execution.
+observation. The React local runner now connects real execution, stable step inspection and durable
+history. Simulation remains a separate explicitly selected demo.
 
 ## Outcome
 
@@ -282,9 +286,10 @@ management; benchmark dashboards and cost pricing.
 ## Approval
 
 The user approved the plan on 2026-11-06, initially requesting documentation only.
-Subsequent instructions authorized Steps 1–2, Step 3, Step 4, and Step 5. Shared
-contracts, package observation, supervised Linux execution and the durable local
-API are implemented; Steps 6–8 remain. Tests are delegated to the user's configured
+Subsequent instructions authorized Steps 1–2, Step 3, Step 4, Step 5, Step 6, Step 7 and Step 8.
+Shared contracts, package observation, supervised Linux execution, the durable
+local API, real Studio execution, controlled verification, sanitized evidence
+and the built-UI launcher are implemented; all eight steps are complete. Tests are delegated to the user's configured
 Deepseek coding subagent.
 
 Approval does not authorize testing new live websites or starting OAuth consent.

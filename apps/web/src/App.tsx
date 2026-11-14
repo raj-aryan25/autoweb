@@ -6,7 +6,8 @@ import { Inspector } from './components/Inspector';
 import { SecondaryPages } from './components/SecondaryPages';
 import { formatClock, formatDuration, getProfile, isMailStep, stepStatus, terminal } from './demo/model';
 import type { PageName, RunConfig } from './demo/model';
-import { useDemoRunner } from './demo/useDemoRunner';
+import { useDemoAdapter } from './runner/useDemoAdapter';
+import { LocalApp } from './local/LocalApp';
 
 const navigation: { id: PageName; label: string; icon: IconName }[] = [
   { id: 'workspace', label: 'Workspace', icon: 'workspace' },
@@ -20,7 +21,10 @@ function pageFromHash(): PageName {
   return navigation.some(item => item.id === candidate) ? candidate as PageName : 'workspace';
 }
 export function App() {
-  const runner = useDemoRunner();
+  return new URLSearchParams(window.location.search).get('mode') === 'demo' ? <DemoApp /> : <LocalApp />;
+}
+export function DemoApp() {
+  const runner = useDemoAdapter();
   const { run, config, history } = runner;
   const [page, setPage] = useState<PageName>(pageFromHash);
   const [selected, setSelected] = useState(3);
@@ -59,7 +63,7 @@ export function App() {
       <div className="sidebar-bottom"><div className="local-label"><span className="status-dot" />Local workspace</div><div className="workspace-account"><span className="avatar">AW</span><span>Personal workspace<small>UI demonstration</small></span></div></div>
     </aside>
     <main id="main-content" className="main" tabIndex={-1}>
-      <header className="topbar"><span className="breadcrumb">Workspace</span><span className="slash">/</span><strong>{page === 'workspace' ? 'Login run' : navigation.find(item => item.id === page)?.label}</strong><span className="demo-badge">UI preview · demo data</span><button className="icon-button help-button" aria-label="About this demo" aria-expanded={showHelp} onClick={() => setShowHelp(!showHelp)}><Icon name="info" /></button></header>
+      <header className="topbar"><span className="breadcrumb">Workspace</span><span className="slash">/</span><strong>{page === 'workspace' ? 'Login run' : navigation.find(item => item.id === page)?.label}</strong><span className="demo-badge">UI preview · demo data</span><a className="text-button" href="?mode=local#workspace">Use local runner</a><button className="icon-button help-button" aria-label="About this demo" aria-expanded={showHelp} onClick={() => setShowHelp(!showHelp)}><Icon name="info" /></button></header>
       {showHelp && <div className="help-note"><Icon name="info" /><div><h2>A working preview, powered by simulated events.</h2><p>Explore the steps, run a successful demo or simulate an email timeout. Nothing contacts a real website, mailbox, or AI service. The production browser will open in a separate window.</p></div><button className="icon-button" aria-label="Close demo information" onClick={() => setShowHelp(false)}><Icon name="close" /></button></div>}
       <div className="sr-only" role="status" aria-live="polite">{announcement}</div>
       {page === 'workspace' ? <>

@@ -198,7 +198,7 @@ class RunStore:
         self.connection.execute("DELETE FROM events WHERE run_id=? AND sequence<=?", (run_id, event.sequence - self.retention))
         return event
 
-    def worker_event(self, event: RunEvent):
+    def worker_event(self, event: RunEvent, *, artifact_path=None):
         with self.connection:
             row = self._row(event.run_id)
             cursor = row["worker_cursor"]
@@ -209,6 +209,20 @@ class RunStore:
             record = self.record(event.run_id)
             skip = (event.payload.type == "run_state_changed" and
                     (event.payload.state == "created" or record.snapshot.state == "stopping"))
+            if event.payload.type == "artifact_registered":
+                from .evidence import approved_artifact
+
+                expected = approved_artifact(event.payload.artifact_id, event.payload.kind)
+                skip = artifact_path is None
+                if artifact_path is not None:
+                    if artifact_path != expected:
+                        raise ValueError("unapproved_artifact")
+                    self.connection.execute("INSERT INTO artifacts VALUES(?,?,?,?)", (
+                        event.run_id, event.payload.artifact_id, artifact_path, event.payload.kind))
+                    from .api_contracts import ArtifactDescriptor
+
+                    descriptor = ArtifactDescriptor(**event.payload.model_dump(), step_id=event.step_id)
+                    self._save(record.model_copy(update={"artifacts": [*record.artifacts, descriptor]}))
             if not skip:
                 self._append(event.run_id, event.payload, source=event)
             self.connection.execute("UPDATE runs SET worker_cursor=? WHERE id=?", (event.sequence, event.run_id))

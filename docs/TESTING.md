@@ -18,6 +18,22 @@ process-crash cases. Install both server and test extras for the full suite. Per
 user's workflow, primary agents delegate test/build execution to the configured
 Deepseek coding Paseo subagent; all commands still use conda `autoweb`.
 
+Step 6 adds [Studio UI acceptance](STUDIO_UI.md): an explicit demo smoke and an
+owned loopback UI → API → package check. Set `AUTOWEB_STUDIO_HEADED=1` for the
+desktop headed controlled-password path. It also exercises refresh, connection
+loss, lost-response idempotency, resync, Stop cleanup and saved history.
+
+Step 7 adds [controlled verification and sanitized evidence](STUDIO_VERIFICATION.md):
+actual OTP/magic workers, safe artifact inventory and retrieval, timeout/masking,
+secret scans, and failure AI accounting. Set `AUTOWEB_STUDIO_VERIFICATION=1` on the
+headed UI acceptance command to include both verification profiles.
+
+Step 8 adds [launcher and final acceptance](STUDIO_ACCEPTANCE.md), including
+`tests/unit/test_studio_launcher.py`, `tests/integration/test_studio_launcher.py`,
+controlled session reuse/logout revocation, and
+`apps/web/scripts/verify_studio_acceptance.py` for the remaining real UI matrix.
+Desktop-window observation is recorded separately from headless screenshots.
+
 Use conda `autoweb` for every command. From the repository root:
 
 ```sh

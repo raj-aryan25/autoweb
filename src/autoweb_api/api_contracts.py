@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from .contracts import Count, DTO, RunOverrides, RunSnapshot, SafeID
+from .contracts import ArtifactRegistered, Count, DTO, RunOverrides, RunSnapshot, SafeID
 from .protocol import Manifest
 
 
@@ -20,6 +20,10 @@ class PreflightResult(DTO):
     external_services: Literal["unverified"] = "unverified"
 
 
+class ArtifactDescriptor(ArtifactRegistered):
+    step_id: SafeID
+
+
 class RunRecord(DTO):
     snapshot: RunSnapshot
     request_id: SafeID
@@ -31,6 +35,7 @@ class RunRecord(DTO):
     cleanup_verified: bool
     cleanup_required: bool
     authentication: Literal["succeeded", "failed", "not_observed"]
+    artifacts: list[ArtifactDescriptor] = Field(default_factory=list, max_length=16)
 
 
 class RunPage(DTO):

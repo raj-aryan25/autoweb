@@ -328,8 +328,14 @@ async def authenticated_session(
             progress.emit("login_outcome", "error")
             raise
         progress.end("browser_startup")
-        result = await _observe_login(session, configuration, verification_provider,
-                                      ai_client=ai_client, progress=progress, preflight_observed=True)
+        try:
+            result = await _observe_login(session, configuration, verification_provider,
+                                          ai_client=ai_client, progress=progress, preflight_observed=True)
+        except LoginError as error:
+            usage = getattr(ai_client, "usage", None)
+            if isinstance(usage, UsageSnapshot):
+                raise LoginError(replace(error.result, ai_usage=usage)) from None
+            raise
         usage = getattr(ai_client, "usage", None)
         if isinstance(usage, UsageSnapshot):
             result = replace(result, ai_usage=usage)

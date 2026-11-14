@@ -109,3 +109,32 @@ def test_report_includes_ai_usage_only_when_present():
     report = login_report(LoginResult("site", "succeeded", 1.0, ai_usage=usage))
     assert report["ai"] == {"calls": 2, "prompt_tokens": 10, "candidate_tokens": 4,
                             "total_tokens": 14}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('snapshot', [UsageSnapshot(), UsageSnapshot(2, 10, 4, 14), None])
+async def test_owned_login_failure_preserves_observed_usage_without_fabrication(monkeypatch, snapshot):
+    from contextlib import asynccontextmanager
+    from types import SimpleNamespace
+    from autoweb.config import load_configuration
+    from autoweb.login import LoginError, authenticated_session
+    from pathlib import Path
+
+    configuration = load_configuration('configs/sites/local-password.example.json',
+        project_root=Path(__file__).resolve().parents[2], environ={
+            'LOCAL_LOGIN_USERNAME': 'test-user', 'LOCAL_LOGIN_PASSWORD': 'test-password',
+            'AUTOWEB_AI_ENABLED': 'false'})
+    @asynccontextmanager
+    async def browser(_settings):
+        yield SimpleNamespace(page=SimpleNamespace())
+
+    async def rejected(*args, **kwargs):
+        raise LoginError(LoginResult('controlled', 'failed', 1, reason='credentials_rejected'))
+
+    monkeypatch.setattr('autoweb.login.flow.open_session', browser)
+    monkeypatch.setattr('autoweb.login.flow._observe_login', rejected)
+    with pytest.raises(LoginError) as failure:
+        async with authenticated_session(configuration, ai_client=SimpleNamespace(usage=snapshot)):
+            pytest.fail('failed login cannot yield')
+    assert failure.value.result.ai_usage == snapshot
+    assert failure.value.result.reason == 'credentials_rejected'

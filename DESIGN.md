@@ -199,9 +199,28 @@ Rail links pair line icons and sentence-case labels. Hover adds a graphite fill;
 
 ### Execution steps and inspector tabs
 
-Step rows carry a circular state marker, title, supporting outcome, and optional monospace duration. Selection adds a deep teal fill and visible border; hover adds a graphite tint. Text and marker maintain distinct pending, running, waiting, succeeded, failed, and cancelled states. The current selection is exposed with `aria-current="step"`.
+Step rows carry a circular state marker, title, supporting outcome, and optional monospace duration. Selection adds a deep teal fill and visible border; hover adds a graphite tint. Text and marker maintain distinct pending, running, waiting, succeeded, failed, cancelled, skipped and not-executed states. Skipped actions retain a dashed neutral marker and are not counted as passed. The current selection is exposed with `aria-current="step"`.
 
 Details, Evidence, and Events tabs use a thin teal underline and teal text for selection. Other tabs remain muted and brighten on hover. Keyboard focus retains the shared offset outline. Step background and border transitions last (180ms, ease-out); reduced-motion preference disables transitions and animation.
+
+### Real execution and connection states
+
+The graphite-and-teal Split composition also serves real execution. The topbar
+labels Local runner connection independently from the saved run outcome. A flat
+information notice carries actionable unavailable/reconnect, pending-start and
+cleanup-uncertain states. Preflight, starting and stopping use explicit control
+labels; controls disable duplicate or conflicting actions. Reconnection preserves
+observed results and does not select demo mode. The separate Open demo text link
+leads to visibly labeled illustrative data.
+
+The inspector uses stable backend step IDs and observed durations. Details keeps
+authentication and browser cleanup separate. Evidence contains registered report
+or masked capture links, with an explicit empty state otherwise; retained inventory
+survives resync. Events identifies expired history and exports sanitized data.
+Gmail/Gemini configuration is never styled as proof of a working connection.
+Existing keyboard tabs, Follow, mobile selected-step scrolling and horizontal
+navigation remain in place. No browser stream, logout, pause or single-step control
+has been added.
 
 ## Do's and Don'ts
 

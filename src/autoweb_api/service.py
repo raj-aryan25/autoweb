@@ -9,11 +9,13 @@ import signal
 from time import monotonic
 from uuid import uuid4
 
-from autoweb.config import ConfigurationError, load_site_profile
+from autoweb.config import ConfigurationError
 
 from .api_contracts import PreflightResult
-from .configuration import ProfileUnavailable, prepare_run
+from .artifacts import read_artifact
+from .configuration import ProfileUnavailable, prepare_run, registered_site
 from .contracts import ProfileDescriptor, StartRun
+from .evidence import approved_artifact
 from .process_tree import ProcessIdentity, owned_snapshot, supported
 from .profiles import REGISTRY, display_steps, resolve_registration
 from .protocol import MAX_LINE, Manifest, EffectiveSettings, RecoveryReceipt, encode
@@ -158,7 +160,15 @@ class RunService:
                 event = reader.result()
                 if event is None:
                     break
-                self.store.worker_event(event)
+                artifact_path = None
+                if event.payload.type == "artifact_registered":
+                    relative = approved_artifact(event.payload.artifact_id, event.payload.kind)
+                    try:
+                        read_artifact(self.settings.artifacts, run_id, relative, event.payload.kind)
+                        artifact_path = relative
+                    except KeyError:
+                        pass  # Missing captures remain absent, while consuming the worker cursor.
+                self.store.worker_event(event, artifact_path=artifact_path)
                 cursor = event.sequence
                 self.notify()
                 reader = asyncio.create_task(handle.next_event(cursor))
@@ -202,9 +212,14 @@ class RunService:
             self.notify()
         return self.store.record(run_id)
 
-    async def close(self):
+    def request_shutdown(self):
         self.closing = True
         self.notify()
+        for handle in self.handles.values():
+            handle.request_stop()
+
+    async def close(self):
+        self.request_shutdown()
         if self.coordinator.active is not None:
             try:
                 await self.coordinator.close()
@@ -240,13 +255,12 @@ class RunService:
         results = []
         for item in REGISTRY:
             controlled = item.classification == "controlled"
-            available = item.id not in {"controlled-otp", "controlled-magic-link"}
+            available = True
             steps = []
             mode = "email_magic_link" if item.id == "controlled-magic-link" else "email_otp" if item.id in {"controlled-otp", "expandtesting-otp"} else "password"
             if available:
                 try:
-                    source = "configs/sites/local-password.example.json" if controlled else item.source
-                    site = load_site_profile(source, project_root=self.settings.root)
+                    site = registered_site(item, self.settings.root)
                     mode, steps = site.login_mode, display_steps(site)
                 except (ConfigurationError, ValueError):
                     available = False

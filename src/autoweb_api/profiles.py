@@ -18,7 +18,7 @@ class Registration:
 
 
 # Sources are private resolver keys, never client paths. Controlled password is
-# implemented; deferred verification fixtures report unavailable, not readiness.
+# implemented with application-owned loopback fixtures and injected verification.
 REGISTRY = (
     Registration("controlled-password", "fixture:password", "controlled", "none"),
     Registration("controlled-otp", "fixture:otp", "controlled", "in_memory"),

@@ -75,10 +75,13 @@ def test_worker_does_not_resolve_unregistered_inputs(configured_root, profile):
 
 
 @pytest.mark.parametrize("profile", ["controlled-otp", "controlled-magic-link"])
-def test_deferred_fixture_is_unavailable_before_clients(configured_root, profile):
-    with pytest.raises(ProfileUnavailable):
-        prepare_run(StartRun(request_id="fixture-check", profile_id=profile), configured_root,
-                    configured_root / "private-run")
+def test_controlled_verification_prepares_without_clients(configured_root, profile):
+    prepared = prepare_run(StartRun(request_id="fixture-check", profile_id=profile), configured_root,
+                           configured_root / "private-run")
+    assert prepared.registration.provider == "in_memory"
+    assert prepared.configuration.site.verification
+    assert prepared.configuration.site.entry_url.startswith("http://127.0.0.1:1/")
+    assert "test@example.test" not in repr(prepared.configuration)
 
 
 def test_controlled_runs_do_not_enable_external_ai(configured_root):
@@ -161,3 +164,48 @@ def test_launch_protocol_does_not_allow_commands_or_credential_values():
 def test_lifecycle_budgets_cannot_be_unbounded(values):
     with pytest.raises(ValueError, match="invalid_lifecycle_limits"):
         LifecycleLimits(*values)
+
+
+def test_registered_password_cannot_silently_acquire_gmail(configured_root):
+    source = ROOT / 'configs/sites/email-otp.example.json'
+    (configured_root / 'configs/sites/local-password.example.json').write_text(source.read_text())
+    with pytest.raises(ConfigurationError, match='registered provider'):
+        prepare_run(StartRun(request_id='provider-policy', profile_id='controlled-password'),
+                    configured_root, configured_root / 'private-run')
+
+
+@pytest.mark.asyncio
+async def test_registered_gmail_loads_only_in_selected_runtime_without_consent(configured_root, monkeypatch):
+    from contextlib import asynccontextmanager
+    from autoweb.contracts import VerificationError
+    from autoweb.login import authenticated_session
+    from autoweb_api.configuration import controlled_site
+
+    shutil.copyfile(ROOT / 'configs/sites/expandtesting-otp.example.json',
+                    configured_root / 'configs/sites/expandtesting-otp.example.json')
+    token = configured_root / 'existing-token.json'
+    environment = {'EXPANDTESTING_EMAIL': 'synthetic@example.test', 'AUTOWEB_GMAIL_TOKEN_FILE': str(token)}
+    monkeypatch.setattr('autoweb_api.configuration.load_environment', lambda root: environment.copy())
+    auth = Mock(side_effect=AssertionError('preflight must not load OAuth'))
+    monkeypatch.setattr('autoweb.gmail.provider.load_credentials', auth)
+    request = StartRun(request_id='gmail-policy', profile_id='expandtesting-otp')
+    with pytest.raises(ConfigurationError, match='Existing Gmail authorization'):
+        prepare_run(request, configured_root, configured_root / 'private-run')
+    # An existing file is a configuration check, not proof that OAuth/Gmail works.
+    token.write_text('synthetic-unverified-token')
+    prepared = prepare_run(request, configured_root, configured_root / 'private-run')
+    auth.assert_not_called()
+    calls = []
+    @asynccontextmanager
+    async def provider(configuration):
+        calls.append(configuration.site.name)
+        raise VerificationError('oauth_setup_required')
+        yield  # pragma: no cover
+    monkeypatch.setattr('autoweb.gmail.provider.open_gmail_provider', provider)
+    monkeypatch.setattr('autoweb.login.flow.open_session', Mock(side_effect=AssertionError('OAuth failure precedes browser')))
+    with controlled_site(prepared) as (configuration, injected):
+        assert injected is None
+        with pytest.raises(VerificationError, match='oauth_setup_required'):
+            async with authenticated_session(configuration):
+                pytest.fail('missing authorization cannot authenticate')
+    assert calls == ['expandtesting-otp']

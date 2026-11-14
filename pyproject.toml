@@ -30,6 +30,7 @@ autoweb-config = "autoweb.config.cli:main"
 autoweb-login = "autoweb.login.cli:main"
 autoweb-gmail = "autoweb.gmail.cli:main"
 autoweb-api = "autoweb_api.cli:main"
+autoweb-studio = "autoweb_api.studio:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
