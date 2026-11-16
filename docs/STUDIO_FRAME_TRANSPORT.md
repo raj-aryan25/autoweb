@@ -97,5 +97,7 @@ socket directories remained after verification.
 
 No live websites, Gmail, OAuth consent or framework AI calls were used; all browser
 runs were headless. Contract generation and the frontend build were not repeated
-because step 3 changes no generated public contracts or frontend source. Public
-view availability remains unavailable until the HTTP endpoints and panel are wired.
+because step 3 changes no generated public contracts or frontend source. Static
+manifests retain their unavailable startup hint. Step 4 adds current availability
+and JPEG reads through [the runtime view API](STUDIO_VIEW_API.md); the frontend
+panel remains pending.

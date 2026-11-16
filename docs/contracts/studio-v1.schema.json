@@ -1090,6 +1090,36 @@
       "title": "RunStateChanged",
       "type": "object"
     },
+    "RunView": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/LiveViewStatus"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ViewFrameMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "run_id",
+        "status"
+      ],
+      "title": "RunView",
+      "type": "object"
+    },
     "StartRun": {
       "additionalProperties": false,
       "properties": {
@@ -1381,10 +1411,59 @@
       ],
       "title": "VerificationWait",
       "type": "object"
+    },
+    "ViewFrameMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "sequence": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "width": {
+          "maximum": 1920,
+          "minimum": 1,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "maximum": 1080,
+          "minimum": 1,
+          "title": "Height",
+          "type": "integer"
+        },
+        "byte_length": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "Byte Length",
+          "type": "integer"
+        },
+        "format": {
+          "const": "jpeg",
+          "default": "jpeg",
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sequence",
+        "captured_at",
+        "width",
+        "height",
+        "byte_length"
+      ],
+      "title": "ViewFrameMetadata",
+      "type": "object"
     }
   },
-  "maxItems": 7,
-  "minItems": 7,
+  "maxItems": 8,
+  "minItems": 8,
   "prefixItems": [
     {
       "$ref": "#/$defs/ContractScenario"
@@ -1406,6 +1485,9 @@
     },
     {
       "$ref": "#/$defs/RunPage"
+    },
+    {
+      "$ref": "#/$defs/RunView"
     }
   ],
   "type": "array"

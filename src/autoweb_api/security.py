@@ -1,6 +1,7 @@
 """Loopback Host/Origin checks and in-memory same-origin CSRF sessions."""
 
 import hmac
+import re
 import secrets
 from http.cookies import SimpleCookie
 from time import monotonic
@@ -80,6 +81,15 @@ class LocalGuard:
                 csrf = self.sessions.lookup(session)
                 if not public and csrf is None:
                     return await reject("session_required", 401)
+                if re.fullmatch(r"/api/runs/[^/]+/view(?:/frame)?", scope["path"]):
+                    # Sensitive pixels are fetched with an explicit read proof,
+                    # never through a cookie-only image/navigation request.
+                    token = headers.get(b"x-autoweb-csrf", "")
+                    if (csrf is None or not token.isascii()
+                            or not hmac.compare_digest(token, csrf)):
+                        return await reject("csrf_required")
+                    if headers.get(b"sec-fetch-site") not in {None, "same-origin", "none"}:
+                        return await reject("invalid_origin")
                 if scope["method"] not in {"GET", "HEAD", "OPTIONS"}:
                     if origin not in self.settings.origins:
                         return await reject("invalid_origin")

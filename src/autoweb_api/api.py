@@ -13,7 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from starlette.staticfiles import StaticFiles
 
-from .api_contracts import PreflightRequest
+from .api_contracts import PreflightRequest, RunView
 from .artifacts import read_artifact
 from .contracts import RunState, SafeID, StartRun
 from .security import COOKIE, LocalGuard, Sessions
@@ -95,6 +95,34 @@ def create_app(settings: ServiceSettings, *, service_factory=RunService):
     async def stop(run_id: SafeID):
         record = app.state.service.stop(run_id)
         return JSONResponse(record.model_dump(mode="json"), status_code=202 if record.active else 200)
+
+    @app.get("/api/runs/{run_id}/view", response_model=RunView)
+    async def view(run_id: SafeID):
+        snapshot, _ = app.state.service.view(run_id)
+        return snapshot
+
+    @app.get("/api/runs/{run_id}/view/frame")
+    async def view_frame(run_id: SafeID, after: Annotated[int, Query(ge=0, le=9007199254740991)] = 0):
+        snapshot, frame = app.state.service.view(run_id)
+        headers = {"X-AutoWeb-Run-ID": run_id, "X-AutoWeb-View-State": snapshot.status.state}
+        metadata = snapshot.frame
+        if metadata is not None:
+            headers.update({
+                "X-AutoWeb-Frame-Sequence": str(metadata.sequence),
+                "X-AutoWeb-Frame-Captured-At": metadata.captured_at.isoformat(),
+                "X-AutoWeb-Frame-Width": str(metadata.width),
+                "X-AutoWeb-Frame-Height": str(metadata.height),
+                "X-AutoWeb-Frame-Byte-Length": str(metadata.byte_length),
+            })
+        if frame is None:
+            if snapshot.status.state == "ended":
+                return JSONResponse({"code": "view_ended"}, status_code=410, headers=headers)
+            if snapshot.status.state == "disabled":
+                return JSONResponse({"code": "view_disabled"}, status_code=409, headers=headers)
+            return Response(status_code=204, headers=headers)
+        if frame.sequence <= after:
+            return Response(status_code=204, headers=headers)
+        return Response(frame.data, media_type="image/jpeg", headers=headers)
 
     @app.get("/api/runs/{run_id}/events")
     async def events(request: Request, run_id: SafeID, after: Annotated[int, Query(ge=0, le=9007199254740991)] = 0):

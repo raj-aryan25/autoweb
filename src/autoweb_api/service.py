@@ -22,6 +22,7 @@ from .protocol import MAX_LINE, Manifest, EffectiveSettings, RecoveryReceipt, en
 from .storage import Conflict, RunStore
 from .worker import CleanupUncertain, WorkerCoordinator
 from .live_transport import cleanup_stale_views
+from .live_view import snapshot_view
 
 
 def identity(value):
@@ -221,6 +222,11 @@ class RunService:
         self.notify()
         for handle in self.handles.values():
             handle.request_stop()
+
+    def view(self, run_id):
+        """Observe one run only; a request cannot create/retain a worker or frame."""
+        record = self.store.record(run_id)  # Unknown IDs use the normal 404 path.
+        return snapshot_view(record, self.handles.get(run_id), closing=self.closing)
 
     async def close(self):
         self.request_shutdown()

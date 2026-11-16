@@ -12,6 +12,10 @@ were used for this delivery's verification.
 
 ## Setup and development
 
+The temporary view status and JPEG frame endpoints are documented in
+[the step 4 view API](STUDIO_VIEW_API.md). They read runtime availability separately
+from static manifests and require a session plus `X-AutoWeb-CSRF` even on GET.
+
 All Python dependencies stay in `pyproject.toml`. The `server` extra pins FastAPI
 0.162.0, Starlette 1.0.0 and Uvicorn 0.54.0; tests add HTTPX 0.28.1. These pins preserve
 the project's Python 3.10 minimum; verification used the existing Python 3.12 conda
@@ -39,9 +43,10 @@ API does not allow. The exact development origin is `http://127.0.0.1:5173`.
 Browser clients should use relative `/api` URLs through this proxy, without CORS.
 
 Studio defaults to headless Chromium and `live_view_enabled: true`. A requested
-view currently reports `manifest.live_view.state: unavailable` with
-`transport_unavailable`, separately from execution/authentication results; frame
-transport and the panel are not connected yet. Set `headless: false` explicitly
+view's static manifest reports `manifest.live_view.state: unavailable` with
+`transport_unavailable`; current availability comes from the runtime view API,
+separately from execution/authentication results. The frontend panel is pending.
+Set `headless: false` explicitly
 for a separate debug window or `live_view_enabled: false` to disable the request.
 See [the live-view foundation](STUDIO_LIVE_VIEW_FOUNDATION.md) for lifecycle,
 capture and legacy-manifest compatibility. Existing pending starts with an explicit

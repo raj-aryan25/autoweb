@@ -55,7 +55,7 @@ class Manifest(DTO):
 
 
 def pending_live_view(enabled: bool) -> LiveViewStatus:
-    """Static manifest hint; requested viewing does not prove an available preview."""
+    """Static manifest hint; current availability comes from the runtime view API."""
     return (LiveViewStatus(state="unavailable", diagnostic="transport_unavailable")
             if enabled else LiveViewStatus())
 
