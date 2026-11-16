@@ -38,7 +38,8 @@ isolate best-effort observation errors; the core does not hide arbitrary hook er
 
 `autoweb_api.live_capture.LiveCapture(profile)` supplies a `session_scope` lifecycle
 factory and a memory-only `latest` frame. Constructing it does not start tasks.
-The executor will wire it to a transport consumer in step 3. HTTP viewing remains pending.
+Step 3 now wires it to the optional private transport consumer inside the executor;
+see [the frame transport](STUDIO_FRAME_TRANSPORT.md). HTTP viewing remains pending.
 An optional trusted `on_frame` callback receives masked frames, including the
 terminal capture, before local memory is cleared. It must only replace/enqueue
 in a bounded consumer buffer, never block or perform I/O. Callback errors make
@@ -87,4 +88,5 @@ The controlled headless UI run succeeded with verified cleanup. No owned API or
 Chromium processes remained. Review images are in
 `.impeccable/review/studio-live-view/`; existing user logs were untouched.
 No live websites, Gmail, OAuth consent, framework AI calls or external requests
-were used. Private frame transport, HTTP endpoints and the frontend panel remain pending.
+were used. This gate preceded step 3's private frame transport; HTTP frame
+endpoints and the frontend viewer panel remain pending.

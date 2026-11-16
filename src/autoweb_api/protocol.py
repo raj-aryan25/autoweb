@@ -19,10 +19,18 @@ MAX_OUTPUT = 4 * 1024 * 1024
 MAX_STEPS = 256
 
 
+class PreviewConnection(DTO):
+    """Service-generated private IPC settings; never accepted by StartRun."""
+
+    socket_path: str = Field(min_length=1, max_length=100, repr=False)
+    token: str = Field(pattern=r"^[a-f0-9]{64}$", repr=False)
+
+
 class Launch(DTO):
     type: Literal["start"]
     run_id: SafeID
     request: StartRun
+    preview: PreviewConnection | None = Field(default=None, repr=False)
 
 
 class Stop(DTO):

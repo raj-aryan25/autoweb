@@ -13,6 +13,7 @@ from uuid import uuid4
 
 from .contracts import FinalOutcome, RunEvent, StartRun
 from .guardian import LifecycleLimits
+from .live_transport import FrameReceiver
 from .process_tree import ProcessIdentity, owned_snapshot, read_identity, supported
 from .protocol import MAX_EVENTS, MAX_LINE, Cleaned, Hello, Launch, Manifest, Stop, decode, encode
 
@@ -53,6 +54,7 @@ class WorkerHandle:
         self._changed = asyncio.Condition()
         self._task: asyncio.Task | None = None
         self._finished = False
+        self.preview: FrameReceiver | None = None
 
     async def wait(self) -> WorkerResult:
         # UI/API request cancellation never cancels the owning supervisor task.
@@ -98,13 +100,14 @@ class WorkerCoordinator:
 
     def __init__(self, root: Path, *, artifacts: Path | None = None,
                  limits: LifecycleLimits | None = None, environment=None,
-                 receipts: Path | None = None, on_spawn=None):
+                 receipts: Path | None = None, on_spawn=None, preview_namespace: str | None = None):
         self.root = Path(root).resolve()
         self.artifacts = Path(artifacts or self.root / "artifacts/studio").resolve()
         self.limits = limits
         self.environment = dict(os.environ if environment is None else environment)
         self.receipts = None if receipts is None else Path(receipts).resolve()
         self.on_spawn = on_spawn
+        self.preview_namespace = preview_namespace or uuid4().hex
         self.active: WorkerHandle | None = None
         self._lock = asyncio.Lock()
 
@@ -134,6 +137,16 @@ class WorkerCoordinator:
         limits = self.limits or LifecycleLimits(max_seconds=120 + handle.launch.request.overrides.login_timeout_seconds)
         reader = None
         try:
+            if handle.launch.request.overrides.live_view_enabled:
+                preview = FrameReceiver(handle.run_id, namespace=self.preview_namespace)
+                try:
+                    connection = await preview.open()
+                    handle.preview = preview
+                    handle.launch = handle.launch.model_copy(update={"preview": connection})
+                except Exception:
+                    # No preview is preferable to changing an authentication
+                    # outcome or preventing a run because IPC is unavailable.
+                    await preview.close()
             command = self._command(limits)
             if self.receipts is not None:
                 command += ["--receipt", str(self.receipts / f"{handle.run_id}.json")]
@@ -184,6 +197,8 @@ class WorkerCoordinator:
                     if frame.run_id != handle.run_id or handle.executor_pid is not None:
                         raise ValueError("protocol_invalid")
                     handle.executor_pid = frame.executor_pid
+                    if handle.preview is not None:
+                        handle.preview.expect_executor(frame.executor_pid)
                 elif isinstance(frame, Manifest):
                     if frame.profile_id != handle.launch.request.profile_id or handle.manifest is not None:
                         raise ValueError("protocol_invalid")
@@ -224,6 +239,8 @@ class WorkerCoordinator:
             await self._recover_known(handle, limits)
             raise CleanupUncertain() from None
         finally:
+            if handle.preview is not None:
+                await handle.preview.close()
             if reader is not None:
                 reader.cancel()
                 await asyncio.gather(reader, return_exceptions=True)

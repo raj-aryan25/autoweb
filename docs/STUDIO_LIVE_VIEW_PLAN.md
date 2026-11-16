@@ -1,8 +1,8 @@
 # Studio live browser view — proposed implementation
 
-Status: approved by the user on 2026-11-15. Steps 1 and 2 are implemented and verified;
-steps 3–7 remain pending. The browser view will reach Studio after transport,
-HTTP endpoints and the frontend panel are connected.
+Status: approved by the user on 2026-11-15. Steps 1–3 are implemented and verified;
+steps 4–7 remain pending. The browser view will reach Studio when the HTTP
+endpoints and frontend panel are connected in subsequent steps.
 
 ## Outcome
 

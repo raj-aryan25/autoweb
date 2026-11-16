@@ -17,6 +17,7 @@ from autoweb.login import LoginError, ProgressObserver, authenticated_session
 from .configuration import ProfileUnavailable, controlled_site, prepare_run
 from .contracts import AIUsage, FinalOutcome
 from .evidence import publish_evidence
+from .live_transport import capture_lifecycle
 from .profiles import display_steps
 from .protocol import (
     MAX_LINE, MAX_OUTPUT, EffectiveSettings, EventClock, ExecutorResult, Launch, Manifest, Stop, encode,
@@ -145,7 +146,10 @@ async def execute(launch, root, artifacts, events, observer):
         events.emit({"type": "preflight", "status": "ready"}, step_id="preflight", phase_id="preflight")
         events.preflight_ready = True
         with controlled_site(prepared) as (configuration, provider):
-            async with authenticated_session(configuration, provider, observer=observer) as result:
+            lifecycle = (capture_lifecycle(launch.preview, launch.run_id, configuration.site)
+                         if launch.preview is not None and launch.request.overrides.live_view_enabled else None)
+            async with authenticated_session(configuration, provider, observer=observer,
+                                             session_lifecycle=lifecycle) as result:
                 if result.ai_usage is not None:
                     usage = AIUsage(**asdict(result.ai_usage))
         state, code = "succeeded", None

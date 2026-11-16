@@ -21,6 +21,7 @@ from .profiles import REGISTRY, display_steps, resolve_registration
 from .protocol import MAX_LINE, Manifest, EffectiveSettings, RecoveryReceipt, encode, pending_live_view
 from .storage import Conflict, RunStore
 from .worker import CleanupUncertain, WorkerCoordinator
+from .live_transport import cleanup_stale_views
 
 
 def identity(value):
@@ -37,7 +38,8 @@ class RunService:
         self.store = RunStore(settings.data_directory / "history.sqlite3", settings.event_retention)
         self.receipts = settings.data_directory / "receipts"
         self.coordinator = coordinator_factory(settings.root, artifacts=settings.artifacts,
-                                               receipts=self.receipts, on_spawn=self._record_owner)
+                                               receipts=self.receipts, on_spawn=self._record_owner,
+                                               preview_namespace=str(settings.data_directory))
         self.handles = {}
         self.tasks = set()
         self.stop_ids = set()
@@ -55,6 +57,8 @@ class RunService:
         try:
             self.store.open()
             await self.recover()
+            if self.store.active_id() is None:
+                cleanup_stale_views(str(self.settings.data_directory))
         except BaseException:
             self.store.close()
             raise RuntimeError("local_service_unavailable") from None
