@@ -31,6 +31,22 @@ def fingerprint(request):
                                      separators=(",", ":")).encode()).hexdigest()
 
 
+def _same_request(row, request):
+    if row["fingerprint"] == fingerprint(request):
+        return True
+    # Older pending Studio starts include the original explicit browser choice
+    # but predate live_view_enabled. Resolve those keys without launching again.
+    # Do not ignore explicit changes to the new option or any old setting.
+    saved = json.loads(row["request"])
+    if "live_view_enabled" in saved.get("overrides", {}) or not request.overrides.live_view_enabled:
+        return False
+    candidate = request.model_dump(mode="json")
+    candidate["overrides"].pop("live_view_enabled")
+    digest = hashlib.sha256(json.dumps(candidate, sort_keys=True,
+                                       separators=(",", ":")).encode()).hexdigest()
+    return digest == row["fingerprint"]
+
+
 class RunStore:
     """Use only from the owning service loop; open/close belong to its lifespan."""
 
@@ -99,9 +115,9 @@ class RunStore:
     def reserve(self, run_id: str, request: StartRun):
         """Commit the idempotency key BEFORE any executor can be launched."""
         with self.connection:
-            old = self.connection.execute("SELECT id,fingerprint FROM runs WHERE request_id=?", (request.request_id,)).fetchone()
+            old = self.connection.execute("SELECT id,fingerprint,request FROM runs WHERE request_id=?", (request.request_id,)).fetchone()
             if old:
-                if old["fingerprint"] != fingerprint(request):
+                if not _same_request(old, request):
                     raise Conflict("request_id_conflict")
                 return self.record(old["id"]), False
             active = self.active_id()

@@ -18,7 +18,7 @@ from .contracts import ProfileDescriptor, StartRun
 from .evidence import approved_artifact
 from .process_tree import ProcessIdentity, owned_snapshot, supported
 from .profiles import REGISTRY, display_steps, resolve_registration
-from .protocol import MAX_LINE, Manifest, EffectiveSettings, RecoveryReceipt, encode
+from .protocol import MAX_LINE, Manifest, EffectiveSettings, RecoveryReceipt, encode, pending_live_view
 from .storage import Conflict, RunStore
 from .worker import CleanupUncertain, WorkerCoordinator
 
@@ -240,7 +240,9 @@ class RunService:
             manifest = Manifest(type="manifest", profile_id=value.profile_id,
                                 steps=display_steps(prepared.configuration.site), effective=EffectiveSettings(
                                     browser=settings.browser, timeouts=settings.timeouts,
-                                    ai_enabled=settings.ai.enabled, ai_model=settings.ai.model))
+                                    ai_enabled=settings.ai.enabled, ai_model=settings.ai.model,
+                                    live_view_enabled=value.overrides.live_view_enabled),
+                                live_view=pending_live_view(value.overrides.live_view_enabled))
             encode(manifest)
             return PreflightResult(status="ready", manifest=manifest)
         except ProfileUnavailable:

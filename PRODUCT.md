@@ -23,8 +23,9 @@ computer and watching login tests to understand and diagnose their behavior.
 ## Product Purpose
 
 Provide a visual interface around reusable website login workflows. The first UI
-must make watching and diagnosing a login run easy, with a visible headed browser
-and understandable execution feedback.
+must make watching and diagnosing a login run easy through an embedded browser
+view and understandable execution feedback. The live-view foundation is in progress;
+its transport and frontend panel are not connected yet.
 
 ## Operating Context
 
@@ -35,7 +36,9 @@ in one monorepo. Active framework code currently lives in src/autoweb/.
 
 - Existing modules separate configuration, browser sessions and actions, login
   orchestration, Gmail verification, optional AI assistance, and reporting.
-- Browser settings already support headed execution and slow motion. Reports
+- Studio defaults to headless execution and requests live viewing. A separate
+  headed window is an explicit debug choice. Preview transport is not yet connected.
+- Browser settings support headed execution and slow motion. Reports
   contain completed step outcomes; Studio consumes sanitized live events through the loopback API.
 - Python project commands use the conda environment autoweb; pyproject.toml remains
   the single Python dependency definition.

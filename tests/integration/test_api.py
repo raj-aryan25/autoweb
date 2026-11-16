@@ -45,7 +45,7 @@ async def test_preflight_is_nonexecuting_and_external_services_stay_unverified(t
         result = await client.post("/api/preflight", json={"profile_id": "controlled-password"})
         assert result.status_code == 200 and result.json()["status"] == "ready"
         assert result.json()["external_services"] == "unverified"
-        assert result.json()["manifest"]["effective"]["browser"]["headless"] is False
+        assert result.json()["manifest"]["effective"]["browser"]["headless"] is True
         verification = await client.post("/api/preflight", json={"profile_id": "controlled-magic-link"})
         assert verification.json()["status"] == "ready"
         assert service.store.page().total == 0 and service.coordinator.active is None

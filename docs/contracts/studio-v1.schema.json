@@ -261,6 +261,11 @@
           ],
           "default": null,
           "title": "Ai Model"
+        },
+        "live_view_enabled": {
+          "default": false,
+          "title": "Live View Enabled",
+          "type": "boolean"
         }
       },
       "required": [
@@ -346,6 +351,43 @@
       "title": "FinalOutcome",
       "type": "object"
     },
+    "LiveViewStatus": {
+      "additionalProperties": false,
+      "description": "Temporary preview availability, independent of authentication/run outcome.",
+      "properties": {
+        "state": {
+          "default": "disabled",
+          "enum": [
+            "disabled",
+            "starting",
+            "live",
+            "unavailable",
+            "ended"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "diagnostic": {
+          "anyOf": [
+            {
+              "enum": [
+                "transport_unavailable",
+                "capture_failed",
+                "page_closed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagnostic"
+        }
+      },
+      "title": "LiveViewStatus",
+      "type": "object"
+    },
     "Manifest": {
       "additionalProperties": false,
       "properties": {
@@ -369,6 +411,9 @@
         },
         "effective": {
           "$ref": "#/$defs/EffectiveSettings"
+        },
+        "live_view": {
+          "$ref": "#/$defs/LiveViewStatus"
         }
       },
       "required": [
@@ -778,8 +823,13 @@
       "additionalProperties": false,
       "properties": {
         "headless": {
-          "default": false,
+          "default": true,
           "title": "Headless",
+          "type": "boolean"
+        },
+        "live_view_enabled": {
+          "default": true,
+          "title": "Live View Enabled",
           "type": "boolean"
         },
         "slow_mo_ms": {

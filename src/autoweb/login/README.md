@@ -47,6 +47,15 @@ async def test_protected_action():
 
 Run async functions through pytest or an async application entry point in conda autoweb. Exiting the async with closes the context/pages, browser, and driver. Exceptions and cancellation also clean up owned resources.
 
+Applications can pass `session_lifecycle=factory` to `authenticated_session`.
+The factory receives the newly opened `BrowserSession` and returns an async
+context manager. It enters before navigation, remains active through the login
+and caller-owned post-login work, and exits before browser closure on success,
+failure or cancellation. This supports optional observation without introducing
+UI dependencies into login orchestration. The factory owns its tasks and must
+bound setup/cleanup; generic lifecycle errors propagate while browser cleanup
+still runs. See [Studio's capture foundation](../../../docs/STUDIO_LIVE_VIEW_FOUNDATION.md).
+
 For a session whose lifetime you already own, use run_login(session, configuration). It returns the same active session on success and does not close caller-owned resources. If it fails, the owner must still close its context.
 
 Success returns LoginResult with site, status, elapsed_seconds, completed/skipped step results, and the active session. Failure raises LoginError with a structured failed result containing failed_step, reason, and available local artifact paths. Failure results do not expose a supposedly authenticated session. Unresolved credentials are rejected before browser startup.

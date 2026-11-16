@@ -3,7 +3,7 @@ import type { ProfileDescriptor, RunEvent, RunOverrides, RunPage, RunRecord, Sta
 import { ApiError, localApi } from './localApi';
 import type { Health } from './localApi';
 
-export const defaultOverrides: RunOverrides = { headless: false, slow_mo_ms: 0, login_timeout_seconds: 120, verification_timeout_seconds: 60, ai_enabled: false };
+export const defaultOverrides: RunOverrides = { headless: true, live_view_enabled: true, slow_mo_ms: 0, login_timeout_seconds: 120, verification_timeout_seconds: 60, ai_enabled: false };
 export function saved(key: string) { try { return localStorage.getItem(`autoweb.${key}`); } catch { return null; } }
 function save(key: string, value: string | null) { try { if (value === null) localStorage.removeItem(`autoweb.${key}`); else localStorage.setItem(`autoweb.${key}`, value); } catch { /* Storage can be disabled. The current session still works. */ } }
 function pendingStart(): StartRun | null {

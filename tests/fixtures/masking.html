@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Capture masking fixture</title></head>
+<body style="margin:0;background:#ffffff;font:14px sans-serif">
+<section id="content" style="padding:8px">
+  <div id="profile-email" data-testid="profile-email"
+       style="width:320px;height:56px;background:#ffffff">person@example.test</div>
+  <label for="username">Username</label>
+  <input id="username" style="width:320px;height:44px;display:block">
+  <label for="password">Password</label>
+  <input id="password" type="password" value="synthetic-private-value"
+         style="width:320px;height:44px;display:block">
+  <div id="caption" data-testid="caption"
+       style="width:320px;height:64px;background:#ffffff;position:relative">
+    <span style="font-size:11px">unmasked text region</span>
+  </div>
+  <custom-host id="shadow-host"></custom-host>
+  <iframe id="frame" title="Inner frame" src="/inner.html" width="320" height="120"
+          style="border:1px solid #ccc;display:block"></iframe>
+  <p id="done" hidden>Done</p>
+</section>
+<script>
+  const shadow = document.querySelector('#shadow-host').attachShadow({ mode: 'open' });
+  shadow.innerHTML = '<input id="shadow-secret" aria-label="Shadow secret" ' +
+    'value="shadow-private-value" style="width:300px;height:44px">';
+</script>
+</body></html>

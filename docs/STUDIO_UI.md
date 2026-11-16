@@ -14,9 +14,11 @@ conda run -n autoweb autoweb-api --root . --ui-directory apps/web/dist
 ```
 
 Open `http://127.0.0.1:8766`. Select **Controlled password**, retain the default
-headed Chromium setting, and choose **Start run**. Its fixture uses synthetic
-credentials and a private loopback server. The browser opens separately; the UI
-shows actual phases, actions, timestamps and the authentication outcome. Stopping
+headless Chromium setting, and choose **Start run**. Its fixture uses synthetic
+credentials and a private loopback server. No desktop window opens by default; the UI
+shows actual phases, actions, timestamps and the authentication outcome. Live viewing
+is requested but not connected yet. Select **Chromium · separate window (debug)**
+explicitly for desktop observation. Stopping
 waits for verified browser cleanup before releasing the server's active slot.
 Linux containment remains the current platform limitation.
 

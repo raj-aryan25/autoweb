@@ -171,7 +171,8 @@ class Replay(DTO):
 
 
 class RunOverrides(DTO):
-    headless: bool = Field(default=False, strict=True)
+    headless: bool = Field(default=True, strict=True)
+    live_view_enabled: bool = Field(default=True, strict=True)
     slow_mo_ms: Annotated[int, Field(strict=True, ge=0, le=2000)] = 0
     login_timeout_seconds: Annotated[int, Field(strict=True, ge=1, le=600)] = 120
     verification_timeout_seconds: Annotated[int, Field(strict=True, ge=1, le=600)] = 60
@@ -188,6 +189,13 @@ class StartRun(DTO):
     request_id: SafeID
     profile_id: SafeID
     overrides: RunOverrides = Field(default_factory=RunOverrides)
+
+
+class LiveViewStatus(DTO):
+    """Temporary preview availability, independent of authentication/run outcome."""
+
+    state: Literal["disabled", "starting", "live", "unavailable", "ended"] = "disabled"
+    diagnostic: Literal["transport_unavailable", "capture_failed", "page_closed"] | None = None
 
 
 class ProfileDescriptor(DTO):

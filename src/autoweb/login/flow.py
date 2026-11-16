@@ -7,7 +7,7 @@ import sys
 from contextlib import AsyncExitStack, asynccontextmanager
 from dataclasses import replace
 from time import monotonic
-from typing import AsyncIterator
+from typing import AsyncContextManager, AsyncIterator, Callable
 
 from pydantic import SecretStr
 
@@ -30,6 +30,9 @@ from .results import LoginResult, StepResult
 from .progress import Progress, ProgressObserver
 from .steps import execute_step
 from .verification import EmailChallenge
+
+
+SessionLifecycle = Callable[[BrowserSession], AsyncContextManager[None]]
 
 
 def validate_password_login(configuration: Configuration) -> None:
@@ -293,8 +296,14 @@ async def _execute_login(session, configuration, verification_provider, *, ai_cl
 async def authenticated_session(
     configuration: Configuration, verification_provider: VerificationProvider | None = None,
     *, ai_client=None, observer: ProgressObserver | None = None,
+    session_lifecycle: SessionLifecycle | None = None,
 ) -> AsyncIterator[LoginResult]:
-    """Own a session, yield it only after proven authentication, and always clean up."""
+    """Own a session and yield it only after proven authentication.
+
+    An optional lifecycle context enters before navigation and exits before the
+    browser closes, including failure/cancellation and caller-owned post-login
+    work. Its owner must bound setup/cleanup and isolate best-effort failures.
+    """
     progress = Progress(observer, configuration.site)
     progress.start("preflight")
     try:
@@ -319,6 +328,8 @@ async def authenticated_session(
             progress.end("preflight")
             progress.start("browser_startup")
             session = await stack.enter_async_context(open_session(configuration.settings))
+            if session_lifecycle is not None:
+                await stack.enter_async_context(session_lifecycle(session))
         except asyncio.CancelledError:
             progress.finish_open("cancelled")
             progress.emit("login_outcome", "cancelled")

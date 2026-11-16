@@ -48,7 +48,10 @@ async def controlled_login():
         await coordinator.close()
 ```
 
-Studio defaults to headed Chromium, no slow motion, 120-second login and 60-second
+Studio originally defaulted to headed Chromium; the live-view foundation changes
+Studio to headless by default, with explicit headed debugging and a requested but
+not yet connected preview. See [steps 1 and 2](STUDIO_LIVE_VIEW_FOUNDATION.md).
+Other defaults remain no slow motion, 120-second login and 60-second
 verification, with AI off. The existing overrides allow headless, slow motion,
 login/verification timeout and AI enabled. The configured AI model is retained;
 there is no model substitution or client-supplied executable, URL or path.

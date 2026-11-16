@@ -32,7 +32,7 @@ not additive. See [final acceptance](docs/STUDIO_ACCEPTANCE.md).
   for the verified local setup; Python dependencies are defined in `pyproject.toml`.
 - npm for the React/TypeScript/Vite frontend, locked by `package-lock.json`.
 - Playwright's matching Chromium binary. A graphical desktop is needed for headed
-  execution; choose headless Chromium in Run configuration when no display exists.
+  debug execution; Studio defaults to headless Chromium without a desktop window.
 
 Run the following commands from the **repository root**, containing both
 `pyproject.toml` and `package.json`. Use conda `autoweb` for project commands.
@@ -91,7 +91,9 @@ To verify your local setup:
 
 1. Open **Run configuration** and select **Controlled password**, **Controlled OTP**
    or **Controlled magic link**.
-2. Keep **Chromium · headed** to watch the browser, or select headless if needed.
+2. Keep **Chromium · headless**, or explicitly select
+   **Chromium · separate window (debug)** for desktop observation. Live viewing is
+   requested by default but is not connected yet.
    Leave AI assistance off for controlled profiles; those runs use no external AI.
 3. Apply configuration, then choose **Start run**. Controlled fixture servers start
    automatically for the run; no separate login-site server is needed.

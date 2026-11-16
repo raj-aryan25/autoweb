@@ -12,9 +12,10 @@ conda run -n autoweb npm run build
 conda run --no-capture-output -n autoweb autoweb-studio --root .
 ```
 
-Open **http://127.0.0.1:8766**. Select a controlled profile, keep headed Chromium,
-and Start run. Watch the separate browser, inspect observed steps/events, use Stop,
-refresh and reopen history. The launcher does not start execution or initiate
+Open **http://127.0.0.1:8766**. Select a controlled profile and Start run. Studio now
+defaults to headless Chromium; live viewing is requested but not connected yet.
+Choose **Chromium · separate window (debug)** explicitly for desktop observation.
+Inspect observed steps/events, use Stop, refresh and reopen history. The launcher does not start execution or initiate
 OAuth consent automatically. The current containment implementation requires Linux.
 
 `--port` chooses a deliberate alternative loopback port. The launcher reserves the

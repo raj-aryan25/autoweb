@@ -20,6 +20,7 @@ from .evidence import publish_evidence
 from .profiles import display_steps
 from .protocol import (
     MAX_LINE, MAX_OUTPUT, EffectiveSettings, EventClock, ExecutorResult, Launch, Manifest, Stop, encode,
+    pending_live_view,
 )
 
 
@@ -134,7 +135,8 @@ async def execute(launch, root, artifacts, events, observer):
                                 steps=display_steps(prepared.configuration.site), effective=EffectiveSettings(
                                     browser=settings.browser, timeouts=settings.timeouts,
                                     ai_enabled=settings.ai.enabled, ai_model=settings.ai.model,
-                                ))
+                                    live_view_enabled=launch.request.overrides.live_view_enabled,
+                                ), live_view=pending_live_view(launch.request.overrides.live_view_enabled))
             events.output.send(manifest)  # Validate size before any fixture/browser startup.
         except ValueError:
             raise ConfigurationError("Profile metadata exceeds worker limits") from None

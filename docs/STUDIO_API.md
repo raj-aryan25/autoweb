@@ -38,6 +38,16 @@ Origin. If 5173 is occupied, it fails rather than silently moving to an origin t
 API does not allow. The exact development origin is `http://127.0.0.1:5173`.
 Browser clients should use relative `/api` URLs through this proxy, without CORS.
 
+Studio defaults to headless Chromium and `live_view_enabled: true`. A requested
+view currently reports `manifest.live_view.state: unavailable` with
+`transport_unavailable`, separately from execution/authentication results; frame
+transport and the panel are not connected yet. Set `headless: false` explicitly
+for a separate debug window or `live_view_enabled: false` to disable the request.
+See [the live-view foundation](STUDIO_LIVE_VIEW_FOUNDATION.md) for lifecycle,
+capture and legacy-manifest compatibility. Existing pending starts with an explicit
+old browser choice can resolve their original idempotency key after this field
+addition; changing execution settings still conflicts rather than rerunning.
+
 For optional same-origin built UI hosting:
 
 ```sh

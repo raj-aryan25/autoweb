@@ -37,7 +37,7 @@ def test_worker_defaults_and_copies_preserve_environment_and_files(configured_ro
     request = StartRun(request_id="copy-check", profile_id="controlled-password")
     prepared = prepare_run(request, configured_root, configured_root / "private-run")
     settings = prepared.configuration.settings
-    assert settings.browser.engine == "chromium" and settings.browser.headless is False
+    assert settings.browser.engine == "chromium" and settings.browser.headless is True
     assert settings.timeouts.login_seconds == 120
     assert not settings.ai.enabled
     assert settings.artifacts_dir == configured_root / "private-run"

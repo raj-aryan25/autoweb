@@ -18,8 +18,10 @@ conda run --no-capture-output -n autoweb autoweb-studio --root .
 ```
 
 Open **http://127.0.0.1:8766**. Select Controlled password, Controlled OTP or
-Controlled magic link and Start run. The default is a real headed Chromium window;
-it opens separately from Studio. A Stop request waits for verified cleanup.
+Controlled magic link and Start run. The default is headless Chromium, so no desktop
+window opens. Select **Chromium · separate window (debug)** explicitly when needed.
+Live viewing is requested by default but remains unavailable until its transport
+and panel are connected. A Stop request waits for verified cleanup.
 Ctrl+C in the launcher stops active execution, drains the stream and closes history
 storage. Nothing starts a login or opens OAuth consent merely by loading Studio.
 

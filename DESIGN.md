@@ -219,8 +219,10 @@ or masked capture links, with an explicit empty state otherwise; retained invent
 survives resync. Events identifies expired history and exports sanitized data.
 Gmail/Gemini configuration is never styled as proof of a working connection.
 Existing keyboard tabs, Follow, mobile selected-step scrolling and horizontal
-navigation remain in place. No browser stream, logout, pause or single-step control
-has been added.
+navigation remain in place. Studio defaults to headless Chromium, with a separate
+window as an explicit debug option. Configuration requests live viewing by default,
+but metadata labels it unavailable until transport and the panel are connected.
+No browser stream, logout, pause or single-step control has been added.
 
 ## Do's and Don'ts
 

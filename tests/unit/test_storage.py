@@ -1,5 +1,6 @@
 """Durability, snapshot reduction, idempotency and replay without launching clients."""
 
+import hashlib
 import json
 
 import pytest
@@ -53,9 +54,38 @@ def test_idempotency_survives_close_and_reopen(tmp_path):
         assert repeated.snapshot.state == "failed"
         assert store.page().total == 1
         with pytest.raises(Conflict, match="request_id_conflict"):
-            store.reserve("run-2", request(headless=True))
+            store.reserve("run-2", request(headless=False))
     finally:
         store.close()
+
+
+def test_pre_upgrade_request_resolves_without_a_second_launch(store):
+    """A pending start saved before live_view_enabled stays idempotent.
+
+    The frontend may still hold the old request JSON (explicit headless choice,
+    no live_view_enabled). After upgrade its canonical retry has the new default
+    True and must resolve the same run rather than conflict.
+    """
+    original, created = store.reserve("run-1", request(headless=False))
+    assert created
+    stored = json.loads(store._row("run-1")["request"])
+    stored["overrides"].pop("live_view_enabled")
+    legacy = json.dumps(stored, sort_keys=True, separators=(",", ":"))
+    digest = hashlib.sha256(legacy.encode()).hexdigest()
+    with store.connection:
+        store.connection.execute("UPDATE runs SET request=?, fingerprint=? WHERE id=?",
+                                 (legacy, digest, "run-1"))
+    assert "live_view_enabled" not in store._row("run-1")["request"]
+
+    resolved, created = store.reserve("unused-new-id", request(headless=False))
+    assert not created and resolved.snapshot.run_id == original.snapshot.run_id == "run-1"
+    assert resolved.overrides.headless is False and resolved.overrides.live_view_enabled is True
+    assert store.page().total == 1 and store.active_id() == "run-1"
+    with pytest.raises(Conflict, match="request_id_conflict"):
+        store.reserve("run-2", request(headless=False, live_view_enabled=False))
+    with pytest.raises(Conflict, match="request_id_conflict"):
+        store.reserve("run-3", request(headless=True))
+    assert store.page().total == 1
 
 
 def test_active_slot_is_transactional_and_unique(store):

@@ -11,7 +11,7 @@ from pydantic import Field
 
 from autoweb.config.models import BrowserSettings, TimeoutSettings
 
-from .contracts import DTO, DisplayStep, FinalOutcome, RunEvent, SafeID, StartRun
+from .contracts import DTO, DisplayStep, FinalOutcome, LiveViewStatus, RunEvent, SafeID, StartRun
 
 MAX_LINE = 16384
 MAX_EVENTS = 2048
@@ -34,6 +34,8 @@ class EffectiveSettings(DTO):
     timeouts: TimeoutSettings
     ai_enabled: bool = Field(strict=True)
     ai_model: str | None = Field(default=None, pattern=r"^(?:models/)?[A-Za-z0-9._-]+$")
+    # False preserves the meaning of manifests saved before live view existed.
+    live_view_enabled: bool = Field(default=False, strict=True)
 
 
 class Manifest(DTO):
@@ -41,6 +43,13 @@ class Manifest(DTO):
     profile_id: SafeID
     steps: list[DisplayStep] = Field(max_length=MAX_STEPS + 10)
     effective: EffectiveSettings
+    live_view: LiveViewStatus = Field(default_factory=LiveViewStatus)
+
+
+def pending_live_view(enabled: bool) -> LiveViewStatus:
+    """Static manifest hint; requested viewing does not prove an available preview."""
+    return (LiveViewStatus(state="unavailable", diagnostic="transport_unavailable")
+            if enabled else LiveViewStatus())
 
 
 class ExecutorResult(DTO):
